@@ -1,0 +1,1612 @@
+<title>Robot Lab — Học lập trình cơ bản bằng game</title>
+
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --paper:#E9ECE7;
+  --surface:#F8F9F6;
+  --surface-2:#EFF2ED;
+  --ink:#141C1A;
+  --ink-soft:#57635F;
+  --ink-faint:#8A9691;
+  --line:#C7CFC9;
+  --line-soft:#DBE1DC;
+  --amber:#C25E14;
+  --amber-soft:#F4E4D4;
+  --teal:#12736A;
+  --teal-soft:#D7E8E4;
+  --indigo:#4F55A8;
+  --indigo-soft:#DFE0F2;
+  --red:#AE332E;
+  --red-soft:#F4DFDD;
+  --shadow:rgba(20,28,26,.10);
+
+  --mono:"Cascadia Mono",Consolas,"SF Mono",ui-monospace,"DejaVu Sans Mono",monospace;
+  --sans:"Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+
+  --s1:.35rem; --s2:.6rem; --s3:.9rem; --s4:1.3rem; --s5:1.9rem; --s6:2.8rem;
+  --pad:clamp(.9rem,2.1vw,1.4rem);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0F1614;--surface:#18211E;--surface-2:#1E2926;--ink:#E4EAE6;--ink-soft:#98A6A0;
+    --ink-faint:#6B7A75;--line:#2C3936;--line-soft:#232F2C;--amber:#F0973F;--amber-soft:#38271A;
+    --teal:#4DC3B1;--teal-soft:#14302D;--indigo:#98A0EC;--indigo-soft:#22254A;--red:#E5665F;
+    --red-soft:#38201F;--shadow:rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="light"]{
+  --paper:#E9ECE7;--surface:#F8F9F6;--surface-2:#EFF2ED;--ink:#141C1A;--ink-soft:#57635F;
+  --ink-faint:#8A9691;--line:#C7CFC9;--line-soft:#DBE1DC;--amber:#C25E14;--amber-soft:#F4E4D4;
+  --teal:#12736A;--teal-soft:#D7E8E4;--indigo:#4F55A8;--indigo-soft:#DFE0F2;--red:#AE332E;
+  --red-soft:#F4DFDD;--shadow:rgba(20,28,26,.10);
+}
+:root[data-theme="dark"]{
+  --paper:#0F1614;--surface:#18211E;--surface-2:#1E2926;--ink:#E4EAE6;--ink-soft:#98A6A0;
+  --ink-faint:#6B7A75;--line:#2C3936;--line-soft:#232F2C;--amber:#F0973F;--amber-soft:#38271A;
+  --teal:#4DC3B1;--teal-soft:#14302D;--indigo:#98A0EC;--indigo-soft:#22254A;--red:#E5665F;
+  --red-soft:#38201F;--shadow:rgba(0,0,0,.4);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+code{font-family:var(--mono);font-size:.92em}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* ============================================================
+   SHELL · MASTHEAD
+   ============================================================ */
+.shell{max-width:1420px;margin:0 auto;padding:var(--pad) var(--pad) var(--s6)}
+.masthead{
+  display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3) var(--s4);
+  padding-bottom:var(--s3);border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:var(--s2)}
+.brand__mark{
+  width:26px;height:26px;flex:none;border:2px solid var(--ink);
+  border-radius:5px;position:relative;background:var(--amber);
+}
+.brand__mark::before{content:"";position:absolute;inset:6px 4px auto;height:5px;background:var(--ink);border-radius:1px}
+.brand__mark::after{content:"";position:absolute;left:50%;top:-8px;translate:-50% 0;width:2px;height:6px;background:var(--ink)}
+.brand__name{font-family:var(--mono);font-size:1.05rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.masthead__tag{margin:0;flex:1 1 22ch;min-width:0;color:var(--ink-soft);font-size:.9rem;max-width:60ch}
+.masthead__side{display:flex;align-items:center;gap:var(--s2);flex:none}
+.meter{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.theme{
+  background:none;border:1px solid var(--line);border-radius:2px;padding:.4rem .7rem;
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+}
+.theme:hover{border-color:var(--ink-soft);color:var(--ink)}
+
+/* ============================================================
+   CHAPTER TRACK
+   ============================================================ */
+.track{display:flex;gap:var(--s2);overflow-x:auto;padding:var(--s3) 0;scrollbar-width:thin}
+.chip{
+  flex:none;display:flex;flex-direction:column;gap:2px;min-width:132px;max-width:172px;
+  padding:.5rem .7rem;text-align:left;background:var(--surface);
+  border:1px solid var(--line);border-radius:2px;transition:border-color .15s,background .15s;
+}
+.chip:hover:not(:disabled){border-color:var(--ink-soft)}
+.chip:disabled{opacity:.42;cursor:not-allowed}
+.chip__no{
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;color:var(--ink-faint);
+  display:flex;justify-content:space-between;gap:4px;
+}
+.chip__name{font-size:.82rem;line-height:1.3;color:var(--ink-soft)}
+.chip[aria-current="true"]{background:var(--amber-soft);border-color:var(--amber)}
+.chip[aria-current="true"] .chip__no{color:var(--amber)}
+.chip[aria-current="true"] .chip__name{color:var(--ink);font-weight:600}
+.chip__tick{color:var(--teal);letter-spacing:0}
+
+/* ============================================================
+   STAGE
+   ============================================================ */
+.stage{display:grid;gap:var(--s3);align-items:start}
+.stage--duo{grid-template-columns:minmax(280px,1fr) minmax(340px,1.35fr)}
+.stage--trio{grid-template-columns:minmax(250px,1fr) minmax(320px,1.45fr) minmax(280px,1.05fr)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:var(--pad);min-width:0}
+.panel__head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:var(--s2);
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-faint);padding-bottom:var(--s2);margin-bottom:var(--s3);
+  border-bottom:1px solid var(--line-soft);
+}
+.panel__count{color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+/* --- lesson --- */
+.tag{
+  display:inline-block;font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--amber);border:1px solid var(--amber);
+  border-radius:2px;padding:.15rem .45rem;margin-bottom:var(--s2);
+}
+.lesson__title{margin:0 0 var(--s2);font-size:1.22rem;line-height:1.3;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.lesson__body p{margin:0 0 var(--s2);color:var(--ink-soft);font-size:.92rem;max-width:62ch}
+.lesson__body p:last-child{margin-bottom:0}
+.lesson__body b{color:var(--ink)}
+.lesson__body code{
+  background:var(--surface-2);border:1px solid var(--line-soft);
+  border-radius:2px;padding:.05em .3em;color:var(--ink);
+}
+.tbl-wrap{overflow-x:auto;margin:var(--s3) 0 0}
+table{border-collapse:collapse;width:100%;font-size:.84rem;min-width:min(100%,320px)}
+th,td{text-align:left;padding:.34rem .5rem;border-bottom:1px solid var(--line-soft);vertical-align:top}
+th{
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:400;border-bottom-color:var(--line);
+}
+td:first-child{font-family:var(--mono);color:var(--amber);white-space:nowrap}
+td:nth-child(2){font-family:var(--mono);color:var(--ink)}
+td:last-child{color:var(--ink-soft)}
+
+.hint{margin-top:var(--s3);border-top:1px solid var(--line-soft);padding-top:var(--s3)}
+.hint summary{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-soft);cursor:pointer;list-style:none;
+}
+.hint summary::marker,.hint summary::-webkit-details-marker{display:none}
+.hint summary::before{content:"▸ ";color:var(--amber)}
+.hint[open] summary::before{content:"▾ "}
+.hint p{margin:var(--s2) 0 0;font-size:.88rem;color:var(--ink-soft)}
+
+/* ============================================================
+   QUIZ SHARED (sort · trace · expr)
+   ============================================================ */
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:var(--s3)}
+.dot{width:16px;height:5px;border-radius:1px;background:var(--line)}
+.dot--hit{background:var(--teal)}
+.dot--miss{background:var(--red)}
+.dot--now{background:var(--amber)}
+
+.card{
+  display:grid;place-items:center;min-height:104px;padding:var(--s4) var(--s3);
+  background:var(--surface-2);border:1px solid var(--line);border-radius:2px;
+  text-align:center;
+}
+.card__value{
+  font-family:var(--mono);font-size:clamp(1.4rem,4.4vw,2.1rem);font-weight:700;
+  color:var(--ink);word-break:break-word;
+}
+.card__note{
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-faint);margin-top:var(--s2);
+}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:var(--s2);margin-top:var(--s3)}
+.opt{
+  padding:.6rem .7rem;background:var(--surface);border:1px solid var(--line);border-radius:2px;
+  font-family:var(--mono);font-size:.92rem;transition:border-color .12s,background .12s;
+  overflow-wrap:anywhere;
+}
+.opt:hover:not(:disabled){border-color:var(--ink-soft)}
+.opt:disabled{cursor:default}
+.opt--right{background:var(--teal-soft);border-color:var(--teal);color:var(--teal);font-weight:700}
+.opt--wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.opt__sub{display:block;font-family:var(--sans);font-size:.68rem;color:var(--ink-faint);margin-top:2px}
+
+.verdict{
+  margin-top:var(--s3);padding:.55rem .7rem;border-radius:2px;font-size:.88rem;
+  background:var(--surface-2);border:1px solid var(--line-soft);color:var(--ink-soft);min-height:2.6rem;
+}
+.verdict--good{background:var(--teal-soft);border-color:var(--teal);color:var(--teal)}
+.verdict--bad{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.verdict b{color:inherit}
+
+.actions{display:flex;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s3);align-items:center}
+.btn{
+  border:1px solid var(--ink);background:var(--surface);border-radius:2px;padding:.48rem .95rem;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
+  transition:background .12s;
+}
+.btn:hover:not(:disabled){background:var(--surface-2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn--go{background:var(--amber);border-color:var(--amber);color:#fff;font-weight:700}
+.btn--go:hover:not(:disabled){filter:brightness(1.08);background:var(--amber)}
+
+/* ============================================================
+   TRACE GAME
+   ============================================================ */
+.trace{display:grid;gap:var(--s3);grid-template-columns:1.2fr .8fr;align-items:start}
+.codeblock{
+  margin:0;font-family:var(--mono);font-size:.86rem;line-height:1.9;
+  background:var(--paper);border:1px solid var(--line-soft);border-radius:2px;
+  padding:.5rem 0;overflow-x:auto;
+}
+.codeline{display:block;padding:0 .7rem;white-space:pre;border-left:3px solid transparent}
+.codeline--now{background:var(--amber-soft);border-left-color:var(--amber)}
+.codeline--done{color:var(--ink-faint)}
+.mem{display:flex;flex-direction:column;gap:var(--s2)}
+.mem__head{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.memcell{
+  display:flex;align-items:stretch;border:1px solid var(--line);border-radius:2px;overflow:hidden;
+  font-family:var(--mono);font-size:.86rem;
+}
+.memcell__name{padding:.3rem .5rem;background:var(--surface-2);color:var(--indigo);border-right:1px solid var(--line)}
+.memcell__val{padding:.3rem .5rem;flex:1;min-width:0;overflow-wrap:anywhere;transition:background .3s}
+.memcell--flash .memcell__val{background:var(--amber-soft)}
+.mem__empty{font-size:.8rem;color:var(--ink-faint);font-family:var(--sans)}
+
+/* ============================================================
+   ROBOT ARENA
+   ============================================================ */
+.arena{
+  position:relative;width:100%;margin-inline:auto;border:1px solid var(--line);
+  background-color:var(--surface-2);
+  background-image:
+    linear-gradient(to right,var(--line-soft) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--line-soft) 1px,transparent 1px);
+  background-size:calc(100%/var(--cols)/2) calc(100%/var(--rows)/2);
+}
+.cells{position:absolute;inset:0;display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr)}
+.cell{position:relative}
+.cell--floor{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-soft)}
+.cell--wall{background:var(--ink-soft);background-image:repeating-linear-gradient(45deg,transparent 0 4px,var(--surface) 4px 5px)}
+.cell--void{background:transparent}
+.cell--goal::before{content:"";position:absolute;inset:16%;border:2px dashed var(--amber);border-radius:50%}
+.cell--goal::after{content:"";position:absolute;inset:38%;background:var(--amber);border-radius:50%}
+.gem{
+  position:absolute;inset:30%;background:var(--teal);rotate:45deg;border-radius:2px;
+  transition:scale .28s ease,opacity .28s ease;
+}
+.gem::after{content:"";position:absolute;inset:18% 55% 55% 18%;background:var(--surface);opacity:.55;border-radius:1px}
+.gem--gone{scale:0;opacity:0}
+.bot{
+  position:absolute;top:0;left:0;
+  width:calc(100%/var(--cols));height:calc(100%/var(--rows));
+  transform:translate(calc(var(--bx)*100%),calc(var(--by)*100%)) rotate(var(--bd));
+  transition:transform .26s cubic-bezier(.34,1.2,.64,1);will-change:transform;
+}
+.bot__body{position:absolute;inset:17%;background:var(--amber);border:2px solid var(--ink);border-radius:18%}
+.bot__eye{position:absolute;left:22%;right:22%;top:34%;height:16%;background:var(--ink);border-radius:1px}
+.bot__nose{position:absolute;left:50%;top:2%;translate:-50% 0;width:0;height:0;border:6px solid transparent;border-bottom-color:var(--ink)}
+.bot--hit{animation:shake .4s}
+@keyframes shake{0%,100%{translate:0 0}20%,60%{translate:-4% 0}40%,80%{translate:4% 0}}
+
+.status{
+  display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3);min-height:2.4rem;
+  padding:.4rem .6rem;border-radius:2px;background:var(--surface-2);
+  border:1px solid var(--line-soft);font-size:.87rem;color:var(--ink-soft);
+}
+.status--bad{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.status--good{background:var(--teal-soft);border-color:var(--teal);color:var(--teal)}
+.status__dot{flex:none;width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.7}
+.speed{margin-left:auto;display:flex;align-items:center;gap:var(--s1)}
+.speed__label{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.speed__btn{background:none;border:1px solid var(--line);border-radius:2px;padding:.25rem .45rem;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft)}
+.speed__btn[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
+
+/* --- level sub-track --- */
+.subtrack{display:flex;gap:var(--s1);margin-bottom:var(--s3);flex-wrap:wrap}
+.subchip{
+  background:var(--surface-2);border:1px solid var(--line);border-radius:2px;
+  padding:.28rem .55rem;font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);
+  display:flex;gap:.35rem;align-items:center;
+}
+.subchip[aria-current="true"]{border-color:var(--amber);color:var(--amber);background:var(--amber-soft)}
+.subchip span{color:var(--teal)}
+
+/* --- toolbox --- */
+.tools{display:flex;flex-direction:column;gap:var(--s1);margin-top:var(--s3)}
+.tool{
+  display:flex;align-items:center;gap:var(--s2);width:100%;text-align:left;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:2px;
+  padding:.42rem .55rem;font-size:.87rem;transition:transform .12s,border-color .12s;
+}
+.tool:hover{border-color:var(--ink-soft);transform:translateX(2px)}
+.tool__key{
+  flex:none;width:18px;height:18px;border-radius:2px;display:grid;place-items:center;
+  font-family:var(--mono);font-size:.62rem;font-weight:700;color:#fff;
+}
+.tool--motion .tool__key{background:var(--ink-soft)}
+.tool--action .tool__key{background:var(--teal)}
+.tool--control .tool__key{background:var(--amber)}
+.tool--func .tool__key{background:var(--indigo)}
+
+/* --- program stack --- */
+.stack{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--s1)}
+.stack--root{min-height:52px}
+.slot{
+  list-style:none;margin:var(--s1) 0 0;padding:0 0 0 var(--s3);
+  display:flex;flex-direction:column;gap:var(--s1);border-left:2px solid var(--line);
+}
+.slot--on{border-left-color:var(--amber)}
+.dropzone{
+  border:1px dashed var(--line);border-radius:2px;padding:.3rem .5rem;
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-faint);text-align:center;background:none;width:100%;
+}
+.dropzone--on{border-color:var(--amber);color:var(--amber);background:var(--amber-soft)}
+.blk{border:1px solid var(--line);border-left-width:4px;border-radius:2px;background:var(--surface-2);padding:.35rem .45rem}
+.blk--motion{border-left-color:var(--ink-soft)}
+.blk--action{border-left-color:var(--teal)}
+.blk--control{border-left-color:var(--amber)}
+.blk--func{border-left-color:var(--indigo)}
+.blk--now{background:var(--amber-soft);border-color:var(--amber)}
+.blk--err{background:var(--red-soft);border-color:var(--red)}
+.blk__row{display:flex;align-items:center;gap:var(--s1);font-size:.87rem}
+.blk__label{flex:1;min-width:0}
+.blk__x{flex:none;background:none;border:none;padding:0 .2rem;line-height:1;color:var(--ink-faint);font-size:1rem}
+.blk__x:hover{color:var(--red)}
+.blk select{
+  font:inherit;font-size:.8rem;font-family:var(--mono);background:var(--surface);
+  color:var(--ink);border:1px solid var(--line);border-radius:2px;padding:.1rem .2rem;
+}
+.func-head{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--indigo);margin:var(--s4) 0 var(--s2);padding-top:var(--s3);border-top:1px solid var(--line-soft);
+}
+.code{margin:var(--s4) 0 0;padding-top:var(--s3);border-top:1px solid var(--line-soft)}
+.code__head{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:var(--s2)}
+.code pre{
+  margin:0;overflow-x:auto;font-family:var(--mono);font-size:.76rem;line-height:1.7;
+  color:var(--ink-soft);background:var(--paper);border:1px solid var(--line-soft);
+  border-radius:2px;padding:.6rem .7rem;
+}
+
+/* ============================================================
+   OVERLAY
+   ============================================================ */
+.over{
+  position:fixed;inset:0;display:none;place-items:center;z-index:20;
+  background:color-mix(in srgb,var(--paper) 84%,transparent);padding:var(--pad);
+}
+.over--on{display:grid}
+.over__card{
+  background:var(--surface);border:1px solid var(--ink);border-radius:2px;
+  padding:var(--s5);max-width:34rem;text-align:center;box-shadow:0 18px 44px var(--shadow);
+}
+.over__stars{font-size:1.9rem;color:var(--amber);letter-spacing:.2em;line-height:1}
+.over__title{margin:var(--s3) 0 var(--s2);font-size:1.4rem;font-weight:700}
+.over__text{margin:0 0 var(--s4);color:var(--ink-soft);font-size:.94rem}
+.over__acts{display:flex;gap:var(--s2);justify-content:center;flex-wrap:wrap}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:1080px){
+  .stage--trio{grid-template-columns:1fr 1fr}
+  .stage--trio .arena-wrap{grid-column:1/-1;order:-1}
+}
+@media (max-width:760px){
+  .stage--duo,.stage--trio{grid-template-columns:1fr}
+  .stage--trio .arena-wrap{order:-1}
+  .trace{grid-template-columns:1fr}
+  .masthead__tag{flex-basis:100%;order:3}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__name">Robot Lab</span>
+    </div>
+    <p class="masthead__tag">Bảy chương lập trình từ số không — kiểu dữ liệu, biến, toán tử, vòng lặp, điều kiện, hàm. Mỗi chương là một game, không phải bài đọc.</p>
+    <div class="masthead__side">
+      <span class="meter" id="meter">0 / 7 chương</span>
+      <button class="theme" id="themeBtn" type="button">Đổi nền</button>
+    </div>
+  </header>
+
+  <nav class="track" id="track" aria-label="Chọn chương"></nav>
+
+  <main class="stage stage--duo" id="stage">
+
+    <!-- ---------- LESSON (dùng chung mọi chương) ---------- -->
+    <section class="panel" id="lessonPanel" aria-labelledby="lessonTitle">
+      <div class="panel__head"><span>Chương</span><span class="panel__count" id="lessonNo">01 / 07</span></div>
+      <span class="tag" id="lessonTag">Kiểu dữ liệu</span>
+      <h2 class="lesson__title" id="lessonTitle">Tiêu đề</h2>
+      <div class="lesson__body" id="lessonBody"></div>
+      <div id="lessonTable"></div>
+      <details class="hint" id="hintBox">
+        <summary>Gợi ý</summary>
+        <p id="hintText"></p>
+      </details>
+      <div id="toolsWrap" hidden>
+        <div class="panel__head" style="margin-top:var(--s5)"><span>Bộ lệnh</span><span class="panel__count">Bấm để thêm</span></div>
+        <div class="tools" id="tools"></div>
+      </div>
+    </section>
+
+    <!-- ---------- GAME: PHÂN LOẠI ---------- -->
+    <section class="panel" id="viewSort" hidden aria-labelledby="sortHead">
+      <div class="panel__head"><span id="sortHead">Băng chuyền phân loại</span><span class="panel__count" id="sortCount">0 / 0</span></div>
+      <div class="dots" id="sortDots"></div>
+      <div class="card">
+        <div>
+          <div class="card__value" id="sortValue">—</div>
+          <div class="card__note">Giá trị này thuộc kiểu nào?</div>
+        </div>
+      </div>
+      <div class="opts" id="sortOpts"></div>
+      <p class="verdict" id="sortVerdict">Chọn một kiểu dữ liệu cho giá trị ở trên.</p>
+      <div class="actions"><button class="btn btn--go" id="sortNext" type="button" disabled>Giá trị tiếp</button></div>
+    </section>
+
+    <!-- ---------- GAME: THEO DẤU GIÁ TRỊ ---------- -->
+    <section class="panel" id="viewTrace" hidden aria-labelledby="traceHead">
+      <div class="panel__head"><span id="traceHead">Theo dấu giá trị</span><span class="panel__count" id="traceCount">0 / 0</span></div>
+      <div class="dots" id="traceDots"></div>
+      <div class="trace">
+        <pre class="codeblock" id="traceCode"></pre>
+        <div class="mem">
+          <div class="mem__head">Bộ nhớ</div>
+          <div id="traceMem"><p class="mem__empty">Chưa có biến nào.</p></div>
+        </div>
+      </div>
+      <p class="card__note" style="text-align:left;margin-top:var(--s3)" id="traceQ">Câu hỏi</p>
+      <div class="opts" id="traceOpts"></div>
+      <p class="verdict" id="traceVerdict">Đoán trước, rồi máy sẽ chạy từng dòng cho bạn xem.</p>
+      <div class="actions"><button class="btn btn--go" id="traceNext" type="button" disabled>Bài tiếp</button></div>
+    </section>
+
+    <!-- ---------- GAME: TOÁN TỬ ---------- -->
+    <section class="panel" id="viewExpr" hidden aria-labelledby="exprHead">
+      <div class="panel__head"><span id="exprHead">Phòng khoá số</span><span class="panel__count" id="exprCount">0 / 0</span></div>
+      <div class="dots" id="exprDots"></div>
+      <div class="card">
+        <div>
+          <div class="card__value" id="exprValue">—</div>
+          <div class="card__note" id="exprNote">Biểu thức này cho kết quả gì?</div>
+        </div>
+      </div>
+      <div class="opts" id="exprOpts"></div>
+      <p class="verdict" id="exprVerdict">Chọn kết quả đúng để mở khoá.</p>
+      <div class="actions"><button class="btn btn--go" id="exprNext" type="button" disabled>Câu tiếp</button></div>
+    </section>
+
+    <!-- ---------- GAME: ROBOT (arena) ---------- -->
+    <section class="panel arena-wrap" id="viewArena" hidden aria-labelledby="arenaHead">
+      <div class="panel__head"><span id="arenaHead">Sân thử</span><span class="panel__count" id="gemCount">Pha lê 0/0</span></div>
+      <div class="subtrack" id="subtrack"></div>
+      <div class="arena" id="arena">
+        <div class="cells" id="cells"></div>
+        <div class="bot" id="bot">
+          <div class="bot__nose"></div>
+          <div class="bot__body"><div class="bot__eye"></div></div>
+        </div>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite">
+        <span class="status__dot"></span><span id="statusText">Xếp lệnh rồi bấm Chạy.</span>
+      </p>
+      <div class="actions">
+        <button class="btn btn--go" id="runBtn" type="button">Chạy</button>
+        <button class="btn" id="stepBtn" type="button">Từng bước</button>
+        <button class="btn" id="resetBtn" type="button">Đặt lại</button>
+        <span class="speed">
+          <span class="speed__label">Tốc độ</span>
+          <button class="speed__btn" data-speed="700" type="button">Chậm</button>
+          <button class="speed__btn" data-speed="360" type="button" aria-pressed="true">Vừa</button>
+          <button class="speed__btn" data-speed="140" type="button">Nhanh</button>
+        </span>
+      </div>
+    </section>
+
+    <!-- ---------- GAME: ROBOT (chương trình) ---------- -->
+    <section class="panel" id="viewProgram" hidden aria-labelledby="progHead">
+      <div class="panel__head"><span id="progHead">Chương trình</span><span class="panel__count" id="progCount">0 lệnh</span></div>
+      <ol class="stack stack--root" id="mainStack"></ol>
+      <div id="funcWrap" hidden>
+        <p class="func-head">Định nghĩa hàm · leo_bac()</p>
+        <ol class="stack" id="funcStack"></ol>
+      </div>
+      <div class="code">
+        <div class="code__head">Chương trình này viết bằng chữ</div>
+        <pre id="codeView"><code></code></pre>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="over" id="over" role="dialog" aria-modal="true" aria-labelledby="overTitle">
+  <div class="over__card">
+    <div class="over__stars" id="overStars">★★★</div>
+    <h2 class="over__title" id="overTitle">Hoàn thành!</h2>
+    <p class="over__text" id="overText"></p>
+    <div class="over__acts">
+      <button class="btn" id="overRetry" type="button">Làm lại</button>
+      <button class="btn btn--go" id="overNext" type="button">Tiếp tục</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var el = function(id){ return document.getElementById(id); };
+var esc = function(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+  });
+};
+
+/* ============================================================
+   CHƯƠNG 1 — KIỂU DỮ LIỆU
+   ============================================================ */
+var TYPE_BINS = ["int","float","str","bool","list"];
+var TYPE_ITEMS = [
+  {v:"42",           t:"int",   why:"Số nguyên, không có dấu chấm thập phân."},
+  {v:'"xin chào"',   t:"str",   why:"Nằm trong dấu nháy nên là chuỗi ký tự."},
+  {v:"3.14",         t:"float", why:"Có phần thập phân nên là số thực."},
+  {v:"True",         t:"bool",  why:"Kiểu logic chỉ có đúng hai giá trị: True và False."},
+  {v:"[1, 2, 3]",    t:"list",  why:"Ngoặc vuông gom nhiều giá trị lại thành một danh sách."},
+  {v:"'7'",          t:"str",   why:"Bẫy quen thuộc: số nằm trong nháy thì vẫn là chuỗi, không cộng trừ như số được."},
+  {v:"0",            t:"int",   why:"Số 0 vẫn là số nguyên bình thường."},
+  {v:"2.0",          t:"float", why:"Có dấu chấm là float, kể cả khi phần lẻ bằng 0."},
+  {v:"False",        t:"bool",  why:"Giá trị sai của kiểu logic."},
+  {v:'"True"',       t:"str",   why:"Có nháy thì nó là chữ, không phải giá trị đúng/sai."},
+  {v:"[]",           t:"list",  why:"Danh sách rỗng vẫn là list, chỉ là chưa có phần tử nào."},
+  {v:"-15",          t:"int",   why:"Số âm nguyên vẫn thuộc kiểu int."}
+];
+
+/* ============================================================
+   CHƯƠNG 2 — BIẾN & PHÉP GÁN
+   ============================================================ */
+var TRACE_TASKS = [
+  {
+    code:["x = 5","y = 3","x = x + y"],
+    ask:"Chạy xong, <code>x</code> bằng bao nhiêu?",
+    opts:["8","5","3","53"], ans:"8",
+    why:"Máy tính vế phải trước: x + y là 5 + 3 = 8. Xong xuôi mới gán 8 ngược vào x."
+  },
+  {
+    code:['a = "2"','b = "3"',"c = a + b"],
+    ask:"Chạy xong, <code>c</code> bằng bao nhiêu?",
+    opts:['"23"',"5","23",'"5"'], ans:'"23"',
+    why:"a và b là chuỗi, nên dấu + nối chúng lại chứ không cộng. Cùng một toán tử nhưng kiểu dữ liệu khác thì kết quả khác."
+  },
+  {
+    code:["diem = 10","diem = 7"],
+    ask:"Chạy xong, <code>diem</code> bằng bao nhiêu?",
+    opts:["7","10","17","0"], ans:"7",
+    why:"Gán lại là ghi đè. Giá trị cũ biến mất, biến chỉ giữ được một giá trị tại một thời điểm."
+  },
+  {
+    code:["x = 1","y = x","x = 9"],
+    ask:"Chạy xong, <code>y</code> bằng bao nhiêu?",
+    opts:["1","9","10","x"], ans:"1",
+    why:"Dòng y = x chép giá trị lúc đó (là 1) sang y. Sau này x đổi thì y không đổi theo."
+  },
+  {
+    code:["n = 4","n = n * n","n = n - 6"],
+    ask:"Chạy xong, <code>n</code> bằng bao nhiêu?",
+    opts:["10","16","2","22"], ans:"10",
+    why:"Chạy tuần tự: n thành 16, rồi 16 - 6 = 10. Mỗi dòng làm việc với giá trị mới nhất."
+  }
+];
+
+/* ============================================================
+   CHƯƠNG 3 — TOÁN TỬ
+   ============================================================ */
+var EXPR_TASKS = [
+  {e:"7 + 3 * 2",     o:["13","20","17","12"],            a:"13",    w:"Nhân chia làm trước cộng trừ: 3 * 2 = 6, rồi 7 + 6 = 13."},
+  {e:"(7 + 3) * 2",   o:["20","13","72","10"],            a:"20",    w:"Ngoặc đổi thứ tự: 7 + 3 = 10 trước, rồi nhân 2."},
+  {e:"7 / 2",         o:["3.5","3","4","3.0"],            a:"3.5",   w:"Dấu / luôn cho số thực, kể cả khi chia hết."},
+  {e:"7 // 2",        o:["3","3.5","4","1"],              a:"3",     w:"Dấu // chia lấy phần nguyên, cắt bỏ phần lẻ."},
+  {e:"7 % 2",         o:["1","3","3.5","0"],              a:"1",     w:"Dấu % lấy phần dư. Rất hay dùng để kiểm tra chẵn lẻ: n % 2 == 0 nghĩa là n chẵn."},
+  {e:"2 ** 5",        o:["32","10","25","7"],             a:"32",    w:"Hai dấu sao là luỹ thừa: 2 nhân với chính nó 5 lần."},
+  {e:"10 == 10.0",    o:["True","False"],                 a:"True",  w:"Dấu == so sánh giá trị chứ không so sánh kiểu, nên int và float bằng nhau được. Nhớ: = là gán, == mới là so sánh."},
+  {e:'"a" == "A"',    o:["False","True"],                 a:"False", w:"Chuỗi phân biệt chữ hoa chữ thường nên hai giá trị này khác nhau."},
+  {e:"5 != 5",        o:["False","True"],                 a:"False", w:"Dấu != hỏi 'có khác nhau không'. Chúng bằng nhau nên câu trả lời là sai."},
+  {e:"3 > 5",         o:["False","True"],                 a:"False", w:"Phép so sánh luôn trả về một giá trị bool, chính là kiểu bạn học ở chương 1."},
+  {e:"True and False",o:["False","True"],                 a:"False", w:"and chỉ đúng khi cả hai vế cùng đúng."},
+  {e:"True or False", o:["True","False"],                 a:"True",  w:"or chỉ sai khi cả hai vế cùng sai."},
+  {e:"not (3 > 5)",   o:["True","False"],                 a:"True",  w:"3 > 5 là False, not đảo ngược nó thành True."},
+  {e:"(2 > 1) and (5 % 2 == 1)", o:["True","False"],      a:"True",  w:"Vế trái đúng, vế phải: 5 % 2 là 1 và 1 == 1 nên cũng đúng. Cả hai đúng thì and đúng."}
+];
+
+/* ============================================================
+   CHƯƠNG 4–7 — MÀN CHƠI ROBOT
+   Ký tự bản đồ: '.' sàn · '#' tường · '*' pha lê · ' ' hố
+   ============================================================ */
+var LEVELS = [
+  { name:"Đi thẳng",
+    hint:"Đếm số ô từ robot tới vòng tròn cam. Mỗi ô là một lệnh Tiến.",
+    grid:["....."], start:{x:0,y:0,d:1}, goal:{x:4,y:0}, par:4,
+    tools:["forward"] },
+  { name:"Rẽ hướng",
+    hint:"Đi hết hàng dưới trước, rồi rẽ trái để ngoặt lên trên.",
+    grid:[".....",".....","....."], start:{x:0,y:2,d:1}, goal:{x:4,y:0}, par:7,
+    tools:["forward","left","right"] },
+  { name:"Nhặt pha lê",
+    hint:"Tiến tới đúng ô có pha lê rồi mới Nhặt, sau đó đi tiếp.",
+    grid:["..*.*.."], start:{x:0,y:0,d:1}, goal:{x:6,y:0}, par:8,
+    tools:["forward","collect"] },
+  { name:"Lặp lại",
+    hint:"Thêm khối Lặp lại, chỉnh số lần thành 11, rồi bỏ một lệnh Tiến vào trong nó.",
+    grid:["............"], start:{x:0,y:0,d:1}, goal:{x:11,y:0}, par:2,
+    tools:["forward","repeat"] },
+  { name:"Bậc thang",
+    hint:"Một bậc gồm bốn lệnh: Tiến, Rẽ trái, Tiến, Rẽ phải. Có ba bậc như vậy.",
+    grid:["   .","  .."," .. ","..  "], start:{x:0,y:3,d:1}, goal:{x:3,y:0}, par:5,
+    tools:["forward","left","right","repeat"] },
+  { name:"Tuần tra",
+    hint:"Lặp 4 lần: Nhặt, rồi Lặp 3 lần Tiến, rồi Rẽ phải. Robot xuất phát quay lên trên và phải về đúng chỗ cũ.",
+    grid:["*..*","....","....","*..*"], start:{x:0,y:3,d:0}, goal:{x:0,y:3}, par:5,
+    tools:["forward","left","right","collect","repeat"] },
+  { name:"Nhặt có chọn lọc",
+    hint:"Lặp 10 lần: Tiến, rồi Nếu đang đứng trên pha lê thì Nhặt.",
+    grid:["..*.**..*.."], start:{x:0,y:0,d:1}, goal:{x:10,y:0}, par:4,
+    tools:["forward","collect","repeat","if"] },
+  { name:"Đi tới khi chạm tường",
+    hint:"Trong khi đường phía trước còn trống thì Tiến. Thoát vòng lặp là robot đã sát tường, lúc đó rẽ trái và tiến một bước.",
+    grid:["........",".......#"], start:{x:0,y:1,d:1}, goal:{x:6,y:0}, par:4,
+    tools:["forward","left","right","while"] },
+  { name:"Đặt tên cho việc",
+    hint:"Trong phần định nghĩa hàm đặt: Tiến, Rẽ trái, Tiến, Rẽ phải. Chương trình chính: Gọi, Gọi, Tiến, Tiến, Gọi, Gọi.",
+    grid:["      .","     ..","  ...."," ..    ","..     "],
+    start:{x:0,y:4,d:1}, goal:{x:6,y:0}, par:10,
+    tools:["forward","left","right","call"], hasFunc:true },
+  { name:"Chuyến cuối",
+    hint:"Trong khi đường phía trước còn trống: Nếu có pha lê thì Nhặt, rồi Tiến. Xong vòng lặp thì Rẽ trái và Tiến.",
+    grid:["............",".*..*...*..#"], start:{x:0,y:1,d:1}, goal:{x:10,y:0}, par:6,
+    tools:["forward","left","right","collect","repeat","if","while"] }
+];
+
+/* ============================================================
+   GIÁO TRÌNH
+   ============================================================ */
+var COURSE = [
+{
+  tag:"Kiểu dữ liệu", name:"Kiểu dữ liệu", game:"sort",
+  title:"Mọi giá trị đều thuộc về một kiểu",
+  body:[
+    "Máy tính không nhìn thấy <b>2</b> giống như bạn. Nó cần biết đó là <i>số</i> để đem đi cộng, hay là <i>chữ</i> để đem đi nối. Cái nhãn đó gọi là <b>kiểu dữ liệu</b>.",
+    "Chọn sai kiểu là nguồn gốc của rất nhiều lỗi: <code>2 + 3</code> cho 5, nhưng <code>\"2\" + \"3\"</code> lại cho <code>\"23\"</code>. Nhìn dấu nháy, dấu chấm và dấu ngoặc là đoán được kiểu."
+  ],
+  table:{head:["Kiểu","Ví dụ","Dùng để"],rows:[
+    ["int","42, 0, -15","số nguyên, đếm số lượng"],
+    ["float","3.14, 2.0","số có phần thập phân"],
+    ["str",'"xin chào", \'7\'',"chữ — luôn nằm trong dấu nháy"],
+    ["bool","True, False","trả lời đúng hay sai"],
+    ["list","[1, 2, 3], []","một dãy nhiều giá trị"]
+  ]},
+  hint:"Cứ thấy dấu nháy là str, thấy dấu chấm giữa hai số là float, thấy ngoặc vuông là list."
+},
+{
+  tag:"Biến", name:"Biến & phép gán", game:"trace",
+  title:"Biến là cái tên gắn vào một giá trị",
+  body:[
+    "<code>x = 5</code> không có nghĩa là “x bằng 5” như trong toán. Nó là một <b>mệnh lệnh</b>: hãy lấy giá trị 5 và gắn cái tên x vào đó.",
+    "Vì là mệnh lệnh nên thứ tự dòng rất quan trọng, và <code>x = x + 1</code> hoàn toàn hợp lệ: máy tính vế phải trước rồi mới gán ngược lại vào x.",
+    "Trong mỗi bài dưới đây, hãy <b>đoán trước</b> kết quả rồi xem máy chạy từng dòng. Đoán sai vài lần là chuyện bình thường — đó chính là lúc bạn học được nhiều nhất."
+  ],
+  hint:"Đọc từ trên xuống, mỗi dòng một lần, và luôn tính hết vế phải trước khi gán."
+},
+{
+  tag:"Toán tử", name:"Toán tử", game:"expr",
+  title:"Những ký hiệu để tính toán và so sánh",
+  body:[
+    "Toán tử là các ký hiệu biến giá trị này thành giá trị khác. Ba nhóm bạn dùng hằng ngày: <b>số học</b> để tính, <b>so sánh</b> để hỏi, <b>logic</b> để ghép nhiều câu hỏi lại.",
+    "Hai điều dễ nhầm nhất: <code>=</code> là gán còn <code>==</code> mới là so sánh; và mọi phép so sánh đều trả về một giá trị <code>bool</code> — đúng cái kiểu bạn học ở chương 1."
+  ],
+  table:{head:["Toán tử","Ví dụ","Nghĩa"],rows:[
+    ["+ - *","7 - 2 → 5","cộng, trừ, nhân"],
+    ["/","7 / 2 → 3.5","chia, luôn ra số thực"],
+    ["//","7 // 2 → 3","chia lấy phần nguyên"],
+    ["%","7 % 2 → 1","chia lấy phần dư"],
+    ["**","2 ** 5 → 32","luỹ thừa"],
+    ["== !=","3 == 3 → True","bằng nhau, khác nhau"],
+    ["> < >= <=","3 > 5 → False","so sánh lớn bé"],
+    ["and or not","not True → False","và, hoặc, phủ định"]
+  ]},
+  hint:"Thứ tự ưu tiên: ngoặc trước, rồi **, rồi * / // %, rồi + -, cuối cùng mới tới so sánh và logic."
+},
+{
+  tag:"Chuỗi lệnh", name:"Chuỗi lệnh", game:"robot", levels:[0,1,2],
+  title:"Máy tính chạy đúng thứ tự bạn viết",
+  body:[
+    "Từ đây bạn điều khiển một con robot. Nó đọc chương trình từ trên xuống dưới và làm từng lệnh một — không thêm, không bớt, không đoán ý bạn.",
+    "Robot luôn nhớ nó đang quay mặt về đâu; đó là <b>trạng thái</b> của nó. Lệnh Tiến đi theo hướng đang quay, nên muốn đổi đường thì phải quay trước rồi mới đi.",
+    "Bấm một lệnh trong Bộ lệnh để thêm nó vào chương trình bên phải. Bấm <code>×</code> để xoá."
+  ],
+  hint:""
+},
+{
+  tag:"Vòng lặp", name:"Vòng lặp", game:"robot", levels:[3,4,5],
+  title:"Chép cùng một lệnh mười lần là dấu hiệu cần vòng lặp",
+  body:[
+    "Khối <b>Lặp lại N lần</b> nói với robot: hãy làm những gì nằm trong tôi, N lần. Bên trong đặt được một lệnh hay cả một nhóm lệnh — tất cả sẽ lặp cùng nhau.",
+    "Vòng lặp không làm chương trình chạy nhanh hơn. Nó làm chương trình <b>ngắn hơn và dễ sửa hơn</b>: đổi một con số là đổi cả hành trình.",
+    "Một vòng lặp còn đặt được bên trong vòng lặp khác. Khi đó vòng trong chạy trọn vẹn ở mỗi nhịp của vòng ngoài — bạn sẽ gặp ở màn Tuần tra."
+  ],
+  hint:"Cách làm của người lập trình: nhìn đường đi, tìm đoạn lặp đi lặp lại, rồi bỏ đúng đoạn đó vào thân vòng lặp."
+},
+{
+  tag:"Điều kiện", name:"Điều kiện", game:"robot", levels:[6,7],
+  title:"Nếu … thì: chương trình biết nhìn trước khi làm",
+  body:[
+    "Khối <b>Nếu</b> chỉ chạy phần bên trong khi điều kiện đúng. Nhờ vậy một chương trình duy nhất xử lý được nhiều tình huống khác nhau, thay vì phải viết riêng cho từng bản đồ.",
+    "Khối <b>Trong khi</b> là vòng lặp không cần biết trước số lần: nó cứ chạy chừng nào điều kiện còn đúng, và dừng ngay khi điều kiện sai.",
+    "Đổi lại, bạn phải tự bảo đảm điều kiện <i>có lúc</i> sai. Nếu không, chương trình chạy mãi không dừng — lỗi kinh điển tên là <b>vòng lặp vô hạn</b>."
+  ],
+  hint:"Điều kiện của khối Nếu và Trong khi chọn được ở ô thả xuống ngay trên khối đó."
+},
+{
+  tag:"Hàm", name:"Hàm & tổng hợp", game:"robot", levels:[8,9],
+  title:"Viết một lần, gọi lại bao nhiêu tuỳ thích",
+  body:[
+    "Khi cùng một nhóm lệnh xuất hiện ở nhiều chỗ rời rạc, vòng lặp không gói gọn được. <b>Hàm</b> giải quyết chuyện đó: bạn đặt tên cho nhóm lệnh — ở đây là <code>leo_bac()</code> — rồi gọi tên đó ở bất cứ đâu.",
+    "Sửa hàm một lần, mọi chỗ gọi đều đổi theo. Đây là lý do hàm có mặt trong mọi ngôn ngữ lập trình.",
+    "Màn cuối gộp tất cả: chuỗi lệnh, vòng lặp, điều kiện và lặp có điều kiện trong cùng một chương trình."
+  ],
+  hint:"Phần định nghĩa hàm nằm ngay dưới chương trình chính, ở cột bên phải."
+}
+];
+
+/* ============================================================
+   TRẠNG THÁI
+   ============================================================ */
+var chapIdx = 0, chap = null;
+var progress = load();
+
+function load(){
+  try{
+    var raw = localStorage.getItem("robotlab.v2");
+    var p = raw ? JSON.parse(raw) : null;
+    if(p && p.done && p.stars) return p;
+  }catch(e){}
+  return {done:{}, stars:{}};
+}
+function save(){ try{ localStorage.setItem("robotlab.v2", JSON.stringify(progress)); }catch(e){} }
+function chapUnlocked(i){ return i === 0 || !!progress.done[i-1]; }
+function markChapterDone(i){
+  if(!progress.done[i]){ progress.done[i] = true; save(); }
+  renderTrack(); renderMeter();
+}
+function renderMeter(){
+  var n = 0;
+  for(var i=0;i<COURSE.length;i++){ if(progress.done[i]) n++; }
+  el("meter").textContent = n + " / " + COURSE.length + " chương";
+}
+
+/* ============================================================
+   OVERLAY
+   ============================================================ */
+var overNextFn = null, overRetryFn = null;
+function showOver(stars, title, text, nextLabel, onNext, onRetry){
+  el("overStars").textContent = stars ? "★★★☆☆☆".slice(3 - stars, 6 - stars) : "◆";
+  el("overTitle").textContent = title;
+  el("overText").textContent = text;
+  el("overNext").textContent = nextLabel;
+  el("overNext").hidden = !onNext;
+  el("overRetry").hidden = !onRetry;
+  overNextFn = onNext; overRetryFn = onRetry;
+  el("over").classList.add("over--on");
+  (onNext ? el("overNext") : el("overRetry")).focus();
+}
+function hideOver(){ el("over").classList.remove("over--on"); }
+el("overNext").addEventListener("click", function(){ hideOver(); if(overNextFn) overNextFn(); });
+el("overRetry").addEventListener("click", function(){ hideOver(); if(overRetryFn) overRetryFn(); });
+el("over").addEventListener("click", function(e){ if(e.target === el("over")) hideOver(); });
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") hideOver(); });
+
+function goNextChapter(){
+  if(chapIdx < COURSE.length - 1) loadChapter(chapIdx + 1);
+}
+
+/* ============================================================
+   DOTS dùng chung
+   ============================================================ */
+function paintDots(host, total, results, now){
+  host.innerHTML = "";
+  for(var i=0;i<total;i++){
+    var d = document.createElement("span");
+    var cls = "dot";
+    if(results[i] === true) cls += " dot--hit";
+    else if(results[i] === false) cls += " dot--miss";
+    else if(i === now) cls += " dot--now";
+    d.className = cls;
+    host.appendChild(d);
+  }
+}
+
+/* ============================================================
+   GAME 1 — PHÂN LOẠI KIỂU DỮ LIỆU
+   ============================================================ */
+var sortState = null;
+function startSort(){
+  sortState = {i:0, results:[], right:0};
+  el("sortOpts").innerHTML = "";
+  TYPE_BINS.forEach(function(t){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "opt"; b.dataset.bin = t;
+    b.innerHTML = esc(t) + '<span class="opt__sub">' + esc(binHint(t)) + "</span>";
+    b.addEventListener("click", function(){ answerSort(t); });
+    el("sortOpts").appendChild(b);
+  });
+  el("sortNext").addEventListener("click", nextSort);
+  drawSort();
+}
+function binHint(t){
+  return {int:"số nguyên", float:"số thực", str:"chuỗi chữ", bool:"đúng / sai", list:"danh sách"}[t];
+}
+function drawSort(){
+  var it = TYPE_ITEMS[sortState.i];
+  el("sortValue").textContent = it.v;
+  el("sortCount").textContent = (sortState.i + 1) + " / " + TYPE_ITEMS.length;
+  paintDots(el("sortDots"), TYPE_ITEMS.length, sortState.results, sortState.i);
+  Array.prototype.forEach.call(el("sortOpts").children, function(b){
+    b.disabled = false;
+    b.className = "opt";
+  });
+  el("sortVerdict").className = "verdict";
+  el("sortVerdict").textContent = "Chọn một kiểu dữ liệu cho giá trị ở trên.";
+  el("sortNext").disabled = true;
+}
+function answerSort(pick){
+  var it = TYPE_ITEMS[sortState.i];
+  var ok = (pick === it.t);
+  sortState.results[sortState.i] = ok;
+  if(ok) sortState.right++;
+  Array.prototype.forEach.call(el("sortOpts").children, function(b){
+    b.disabled = true;
+    if(b.dataset.bin === it.t) b.classList.add("opt--right");
+    else if(b.dataset.bin === pick) b.classList.add("opt--wrong");
+  });
+  el("sortVerdict").className = "verdict " + (ok ? "verdict--good" : "verdict--bad");
+  el("sortVerdict").innerHTML = (ok ? "Đúng. " : "Chưa đúng — <b>" + esc(it.v) + "</b> thuộc kiểu <b>" + it.t + "</b>. ") + esc(it.why);
+  paintDots(el("sortDots"), TYPE_ITEMS.length, sortState.results, -1);
+  el("sortNext").disabled = false;
+  el("sortNext").textContent = (sortState.i === TYPE_ITEMS.length - 1) ? "Xem kết quả" : "Giá trị tiếp";
+  el("sortNext").focus();
+}
+function nextSort(){
+  if(sortState.i < TYPE_ITEMS.length - 1){ sortState.i++; drawSort(); return; }
+  finishQuiz(sortState.right, TYPE_ITEMS.length, "phân loại đúng", startSort);
+}
+
+/* ============================================================
+   GAME 2 — THEO DẤU GIÁ TRỊ
+   ============================================================ */
+var traceState = null;
+function startTrace(){
+  traceState = {i:0, results:[], right:0, timer:null};
+  el("traceNext").addEventListener("click", nextTrace);
+  drawTrace();
+}
+function drawTrace(){
+  if(traceState.timer){ clearInterval(traceState.timer); traceState.timer = null; }
+  var t = TRACE_TASKS[traceState.i];
+  el("traceCount").textContent = (traceState.i + 1) + " / " + TRACE_TASKS.length;
+  paintDots(el("traceDots"), TRACE_TASKS.length, traceState.results, traceState.i);
+
+  el("traceCode").innerHTML = t.code.map(function(l){
+    return '<span class="codeline">' + esc(l) + "</span>";
+  }).join("");
+  el("traceMem").innerHTML = '<p class="mem__empty">Chưa có biến nào.</p>';
+  el("traceQ").innerHTML = t.ask;
+
+  el("traceOpts").innerHTML = "";
+  t.opts.forEach(function(o){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "opt"; b.dataset.val = o;
+    b.textContent = o;
+    b.addEventListener("click", function(){ answerTrace(o); });
+    el("traceOpts").appendChild(b);
+  });
+  el("traceVerdict").className = "verdict";
+  el("traceVerdict").textContent = "Đoán trước, rồi máy sẽ chạy từng dòng cho bạn xem.";
+  el("traceNext").disabled = true;
+}
+function answerTrace(pick){
+  var t = TRACE_TASKS[traceState.i];
+  var ok = (pick === t.ans);
+  traceState.results[traceState.i] = ok;
+  if(ok) traceState.right++;
+  Array.prototype.forEach.call(el("traceOpts").children, function(b){
+    b.disabled = true;
+    if(b.dataset.val === t.ans) b.classList.add("opt--right");
+    else if(b.dataset.val === pick) b.classList.add("opt--wrong");
+  });
+  el("traceVerdict").className = "verdict " + (ok ? "verdict--good" : "verdict--bad");
+  el("traceVerdict").innerHTML = (ok ? "Đúng. " : "Chưa đúng — kết quả là <b>" + esc(t.ans) + "</b>. ") + esc(t.why);
+  paintDots(el("traceDots"), TRACE_TASKS.length, traceState.results, -1);
+  runTrace(t);
+  el("traceNext").disabled = false;
+  el("traceNext").textContent = (traceState.i === TRACE_TASKS.length - 1) ? "Xem kết quả" : "Bài tiếp";
+}
+function runTrace(t){
+  var mem = {}, order = [], line = 0;
+  var lines = el("traceCode").children;
+  traceState.timer = setInterval(function(){
+    var i;
+    for(i=0;i<lines.length;i++){
+      lines[i].className = "codeline" + (i < line ? " codeline--done" : "");
+    }
+    if(line >= t.code.length){
+      clearInterval(traceState.timer); traceState.timer = null;
+      return;
+    }
+    lines[line].className = "codeline codeline--now";
+    var stmt = t.code[line];
+    var m = stmt.split("=");
+    var nameVar = m[0].trim();
+    var expr = m.slice(1).join("=").trim();
+    if(order.indexOf(nameVar) < 0) order.push(nameVar);
+    mem[nameVar] = evalSimple(expr, mem);
+    paintMem(mem, order, nameVar);
+    line++;
+  }, 620);
+}
+/* Bộ tính rất nhỏ: chỉ đủ cho các bài trace ở trên (chuỗi, số, + - *) */
+function evalSimple(expr, mem){
+  var parts = expr.split(/([+\-*])/).map(function(s){ return s.trim(); });
+  var cur = valueOf(parts[0], mem);
+  for(var i=1;i<parts.length;i+=2){
+    var op = parts[i], rhs = valueOf(parts[i+1], mem);
+    if(op === "+"){
+      cur = (typeof cur === "string" || typeof rhs === "string")
+        ? String(strip(cur)) + String(strip(rhs))
+        : cur + rhs;
+      if(typeof cur === "string") cur = '"' + cur + '"';
+    }
+    else if(op === "-") cur = num(cur) - num(rhs);
+    else if(op === "*") cur = num(cur) * num(rhs);
+  }
+  return cur;
+  function strip(v){ return String(v).replace(/^["']|["']$/g, ""); }
+  function num(v){ return parseFloat(String(v).replace(/["']/g, "")) || 0; }
+}
+function valueOf(tok, mem){
+  if(tok === undefined) return 0;
+  tok = tok.trim();
+  if(/^["'].*["']$/.test(tok)) return '"' + tok.replace(/^["']|["']$/g, "") + '"';
+  if(/^-?\d+(\.\d+)?$/.test(tok)) return parseFloat(tok);
+  if(tok in mem) return mem[tok];
+  return tok;
+}
+function paintMem(mem, order, flash){
+  var host = el("traceMem");
+  host.innerHTML = "";
+  if(order.length === 0){ host.innerHTML = '<p class="mem__empty">Chưa có biến nào.</p>'; return; }
+  order.forEach(function(k){
+    var row = document.createElement("div");
+    row.className = "memcell" + (k === flash ? " memcell--flash" : "");
+    row.innerHTML = '<span class="memcell__name">' + esc(k) + '</span>' +
+                    '<span class="memcell__val">' + esc(mem[k]) + "</span>";
+    host.appendChild(row);
+  });
+}
+function nextTrace(){
+  if(traceState.timer){ clearInterval(traceState.timer); traceState.timer = null; }
+  if(traceState.i < TRACE_TASKS.length - 1){ traceState.i++; drawTrace(); return; }
+  finishQuiz(traceState.right, TRACE_TASKS.length, "đoán đúng", startTrace);
+}
+
+/* ============================================================
+   GAME 3 — TOÁN TỬ
+   ============================================================ */
+var exprState = null;
+function startExpr(){
+  exprState = {i:0, results:[], right:0};
+  el("exprNext").addEventListener("click", nextExpr);
+  drawExpr();
+}
+function drawExpr(){
+  var t = EXPR_TASKS[exprState.i];
+  el("exprValue").textContent = t.e;
+  el("exprCount").textContent = (exprState.i + 1) + " / " + EXPR_TASKS.length;
+  paintDots(el("exprDots"), EXPR_TASKS.length, exprState.results, exprState.i);
+  el("exprOpts").innerHTML = "";
+  t.o.forEach(function(o){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "opt"; b.dataset.val = o;
+    b.textContent = o;
+    b.addEventListener("click", function(){ answerExpr(o); });
+    el("exprOpts").appendChild(b);
+  });
+  el("exprVerdict").className = "verdict";
+  el("exprVerdict").textContent = "Chọn kết quả đúng để mở khoá.";
+  el("exprNext").disabled = true;
+}
+function answerExpr(pick){
+  var t = EXPR_TASKS[exprState.i];
+  var ok = (pick === t.a);
+  exprState.results[exprState.i] = ok;
+  if(ok) exprState.right++;
+  Array.prototype.forEach.call(el("exprOpts").children, function(b){
+    b.disabled = true;
+    if(b.dataset.val === t.a) b.classList.add("opt--right");
+    else if(b.dataset.val === pick) b.classList.add("opt--wrong");
+  });
+  el("exprVerdict").className = "verdict " + (ok ? "verdict--good" : "verdict--bad");
+  el("exprVerdict").innerHTML = (ok ? "Đúng. " : "Chưa đúng — kết quả là <b>" + esc(t.a) + "</b>. ") + esc(t.w);
+  paintDots(el("exprDots"), EXPR_TASKS.length, exprState.results, -1);
+  el("exprNext").disabled = false;
+  el("exprNext").textContent = (exprState.i === EXPR_TASKS.length - 1) ? "Xem kết quả" : "Câu tiếp";
+  el("exprNext").focus();
+}
+function nextExpr(){
+  if(exprState.i < EXPR_TASKS.length - 1){ exprState.i++; drawExpr(); return; }
+  finishQuiz(exprState.right, EXPR_TASKS.length, "trả lời đúng", startExpr);
+}
+
+/* --- kết thúc quiz dùng chung --- */
+function finishQuiz(right, total, verb, retryFn){
+  var ratio = right / total;
+  var stars = ratio === 1 ? 3 : (ratio >= 0.7 ? 2 : 1);
+  var pass = ratio >= 0.7;
+  if(pass) markChapterDone(chapIdx);
+  var text = "Bạn " + verb + " " + right + "/" + total + " câu. " +
+    (pass ? "Chương đã mở khoá phần tiếp theo." :
+            "Cần đúng ít nhất 70% để qua chương. Làm lại một lượt nữa nhé — lần này bạn đã biết các bẫy rồi.");
+  showOver(stars, pass ? "Qua chương!" : "Gần được rồi", text,
+    pass ? "Chương tiếp theo" : "",
+    pass && chapIdx < COURSE.length - 1 ? goNextChapter : null,
+    retryFn);
+}
+
+/* ============================================================
+   GAME 4 — ROBOT
+   ============================================================ */
+var DEFS = {
+  forward:{cat:"motion",key:"↑",label:"Tiến"},
+  left:   {cat:"motion",key:"↰",label:"Rẽ trái"},
+  right:  {cat:"motion",key:"↱",label:"Rẽ phải"},
+  collect:{cat:"action",key:"◆",label:"Nhặt"},
+  repeat: {cat:"control",key:"⟳",label:"Lặp lại",container:true},
+  "if":   {cat:"control",key:"?",label:"Nếu",container:true},
+  "while":{cat:"control",key:"∞",label:"Trong khi",container:true},
+  call:   {cat:"func",key:"ƒ",label:"Gọi leo_bac()"}
+};
+var CONDS = {
+  gem:   {label:"đang đứng trên pha lê", code:"co_pha_le()"},
+  nowall:{label:"đường phía trước trống", code:"duong_trong()"},
+  wall:  {label:"phía trước có tường",    code:"co_tuong()"}
+};
+var DIRS = [[0,-1],[1,0],[0,1],[-1,0]];   // 0 lên · 1 phải · 2 xuống · 3 trái
+
+var uid = 0;
+var lvlIdx = 0, level = null;
+var program = {main:[], func:[]};
+var target = "main";
+var world = null, runner = null, timer = null, speed = 360, botAngle = 0;
+
+function cellAt(x,y){
+  if(y < 0 || y >= level.grid.length) return null;
+  var row = level.grid[y];
+  if(x < 0 || x >= row.length) return null;
+  return row.charAt(x);
+}
+function walkable(x,y){ var c = cellAt(x,y); return c === "." || c === "*"; }
+
+function resetWorld(){
+  stopRun();
+  world = {x:level.start.x, y:level.start.y, d:level.start.d, gems:{}, left:0};
+  for(var y=0;y<level.grid.length;y++){
+    for(var x=0;x<level.grid[y].length;x++){
+      if(level.grid[y].charAt(x) === "*"){ world.gems[x + "," + y] = true; world.left++; }
+    }
+  }
+  botAngle = level.start.d * 90;
+  buildArena();
+  drawBot();
+  setStatus("Xếp lệnh rồi bấm Chạy.", "");
+  markBlock(null, false);
+}
+function buildArena(){
+  var arena = el("arena"), cells = el("cells");
+  var rows = level.grid.length, cols = 0, y, x;
+  for(y=0;y<rows;y++) cols = Math.max(cols, level.grid[y].length);
+  arena.style.setProperty("--cols", cols);
+  arena.style.setProperty("--rows", rows);
+  arena.style.aspectRatio = cols + " / " + rows;
+  arena.style.maxWidth = (cols * 74) + "px";
+  cells.innerHTML = "";
+  for(y=0;y<rows;y++){
+    for(x=0;x<cols;x++){
+      var c = cellAt(x,y), d = document.createElement("div"), cls = "cell ";
+      if(c === "#") cls += "cell--wall";
+      else if(c === "." || c === "*") cls += "cell--floor";
+      else cls += "cell--void";
+      if(level.goal.x === x && level.goal.y === y) cls += " cell--goal";
+      d.className = cls;
+      if(c === "*"){
+        var g = document.createElement("div");
+        g.className = "gem"; g.dataset.gem = x + "," + y;
+        d.appendChild(g);
+      }
+      cells.appendChild(d);
+    }
+  }
+  updateGemCount();
+}
+function drawBot(){
+  var bot = el("bot");
+  bot.style.setProperty("--bx", world.x);
+  bot.style.setProperty("--by", world.y);
+  bot.style.setProperty("--bd", botAngle + "deg");
+}
+function updateGemCount(){
+  var total = 0;
+  for(var y=0;y<level.grid.length;y++){
+    for(var x=0;x<level.grid[y].length;x++){
+      if(level.grid[y].charAt(x) === "*") total++;
+    }
+  }
+  el("gemCount").textContent = "Pha lê " + (total - world.left) + "/" + total;
+}
+function setStatus(text, kind){
+  el("statusText").textContent = text;
+  el("status").className = "status" + (kind ? " status--" + kind : "");
+}
+
+/* --- thông dịch --- */
+function makeErr(id, msg){ return {id:id, error:msg}; }
+function evalCond(cond){
+  var nx = world.x + DIRS[world.d][0], ny = world.y + DIRS[world.d][1];
+  if(cond === "gem")    return !!world.gems[world.x + "," + world.y];
+  if(cond === "nowall") return walkable(nx, ny);
+  if(cond === "wall")   return !walkable(nx, ny);
+  return false;
+}
+function* execList(list, budget){
+  var i, b, n, res;
+  for(i=0;i<list.length;i++){
+    b = list[i];
+    if(++budget.n > 4000){
+      yield makeErr(b.id, "Chương trình chạy quá lâu — nhiều khả năng có vòng lặp không bao giờ dừng.");
+      return "stop";
+    }
+    if(b.type === "forward"){
+      var nx = world.x + DIRS[world.d][0], ny = world.y + DIRS[world.d][1];
+      var c = cellAt(nx, ny);
+      if(c === null){ yield makeErr(b.id, "Robot đi ra ngoài bản đồ. Kiểm tra lại hướng quay."); return "stop"; }
+      if(c === "#"){ yield makeErr(b.id, "Robot đâm vào tường. Cần quay hướng khác trước khi tiến."); return "stop"; }
+      if(c === " "){ yield makeErr(b.id, "Robot rơi xuống hố. Chỉ đi được trên các ô sàn sáng màu."); return "stop"; }
+      world.x = nx; world.y = ny;
+      yield {id:b.id};
+    }
+    else if(b.type === "left"){  world.d = (world.d + 3) % 4; botAngle -= 90; yield {id:b.id}; }
+    else if(b.type === "right"){ world.d = (world.d + 1) % 4; botAngle += 90; yield {id:b.id}; }
+    else if(b.type === "collect"){
+      var k = world.x + "," + world.y;
+      if(!world.gems[k]){
+        yield makeErr(b.id, "Ô này không có pha lê. Lệnh Nhặt chỉ ăn được khi robot đứng đúng ô có pha lê.");
+        return "stop";
+      }
+      delete world.gems[k]; world.left--;
+      yield {id:b.id, ate:k};
+    }
+    else if(b.type === "repeat"){
+      for(n=0;n<b.n;n++){
+        yield {id:b.id, ctrl:true};
+        res = yield* execList(b.body, budget);
+        if(res === "stop") return "stop";
+      }
+    }
+    else if(b.type === "if"){
+      yield {id:b.id, ctrl:true};
+      if(evalCond(b.cond)){
+        res = yield* execList(b.body, budget);
+        if(res === "stop") return "stop";
+      }
+    }
+    else if(b.type === "while"){
+      var spins = 0;
+      while(evalCond(b.cond)){
+        if(++spins > 400){
+          yield makeErr(b.id, "Vòng lặp Trong khi chạy mãi không dừng. Điều kiện phải có lúc sai.");
+          return "stop";
+        }
+        yield {id:b.id, ctrl:true};
+        res = yield* execList(b.body, budget);
+        if(res === "stop") return "stop";
+      }
+    }
+    else if(b.type === "call"){
+      yield {id:b.id, ctrl:true};
+      res = yield* execList(program.func, budget);
+      if(res === "stop") return "stop";
+    }
+  }
+  return "ok";
+}
+
+/* --- chạy --- */
+function startRun(){
+  if(runner) return;
+  if(countBlocks() === 0){ setStatus("Chương trình đang trống. Thêm lệnh từ Bộ lệnh bên trái.", "bad"); return; }
+  resetWorld();
+  runner = execList(program.main, {n:0});
+  el("runBtn").textContent = "Dừng";
+  timer = setInterval(tick, speed);
+  tick();
+}
+function stopRun(){
+  if(timer){ clearInterval(timer); timer = null; }
+  runner = null;
+  el("runBtn").textContent = "Chạy";
+}
+function tick(){
+  if(!runner) return;
+  var r = runner.next();
+  if(r.done){ stopRun(); markBlock(null, false); finishLevel(); return; }
+  var s = r.value;
+  if(s.ate){
+    var g = document.querySelector('[data-gem="' + s.ate + '"]');
+    if(g) g.classList.add("gem--gone");
+    updateGemCount();
+  }
+  drawBot();
+  if(s.error){
+    markBlock(s.id, true);
+    setStatus(s.error, "bad");
+    el("bot").classList.add("bot--hit");
+    setTimeout(function(){ el("bot").classList.remove("bot--hit"); }, 420);
+    stopRun();
+    return;
+  }
+  markBlock(s.id, false);
+}
+function stepOnce(){
+  if(timer){ clearInterval(timer); timer = null; el("runBtn").textContent = "Chạy"; }
+  if(!runner){
+    if(countBlocks() === 0){ setStatus("Chương trình đang trống. Thêm lệnh từ Bộ lệnh bên trái.", "bad"); return; }
+    resetWorld();
+    runner = execList(program.main, {n:0});
+  }
+  tick();
+}
+function finishLevel(){
+  var onGoal = (world.x === level.goal.x && world.y === level.goal.y);
+  if(world.left > 0){
+    setStatus("Chạy xong nhưng còn " + world.left + " viên pha lê chưa nhặt.", "bad"); return;
+  }
+  if(!onGoal){
+    setStatus("Chạy xong nhưng robot không dừng ở bãi đáp.", "bad"); return;
+  }
+  var used = countBlocks();
+  var stars = used <= level.par ? 3 : (used <= level.par + 3 ? 2 : 1);
+  var key = String(level.idx);
+  if(!progress.stars[key] || progress.stars[key] < stars){ progress.stars[key] = stars; save(); }
+  setStatus("Hoàn thành màn " + level.name + ".", "good");
+  renderSubtrack();
+
+  var pos = chap.levels.indexOf(level.idx);
+  var lastOfChapter = (pos === chap.levels.length - 1);
+  var allDone = chap.levels.every(function(li){ return progress.stars[String(li)] > 0; });
+  if(allDone) markChapterDone(chapIdx);
+
+  var text = stars === 3
+    ? "Bạn dùng " + used + " lệnh — đúng bằng lời giải gọn nhất. Chương trình ngắn thường là chương trình dễ đọc và dễ sửa."
+    : "Bạn dùng " + used + " lệnh, lời giải gọn nhất chỉ cần " + level.par + ". Thử tìm đoạn nào đang bị lặp lại và gom nó vào một khối.";
+
+  var next = null, label = "";
+  if(!lastOfChapter){
+    label = "Màn tiếp theo";
+    next = function(){ loadLevel(chap.levels[pos + 1]); };
+  } else if(allDone && chapIdx < COURSE.length - 1){
+    label = "Chương tiếp theo";
+    next = goNextChapter;
+  } else if(allDone){
+    label = "";
+    text += " Bạn đã đi hết cả khoá học.";
+  }
+  showOver(stars, lastOfChapter && allDone ? "Xong chương!" : "Hoàn thành màn!", text, label, next, function(){
+    program = {main:[], func:[]}; target = "main"; renderProgram(); resetWorld();
+  });
+}
+
+/* --- khối lệnh --- */
+function newBlock(type){
+  var b = {id:"b" + (++uid), type:type};
+  if(type === "repeat"){ b.n = 4; b.body = []; }
+  if(type === "if"){ b.cond = "gem"; b.body = []; }
+  if(type === "while"){ b.cond = "nowall"; b.body = []; }
+  return b;
+}
+function findBody(id){
+  if(id === "main") return program.main;
+  if(id === "func") return program.func;
+  return search(program.main) || search(program.func) || program.main;
+  function search(arr){
+    for(var i=0;i<arr.length;i++){
+      if(arr[i].id === id && arr[i].body) return arr[i].body;
+      if(arr[i].body){ var r = search(arr[i].body); if(r) return r; }
+    }
+    return null;
+  }
+}
+function removeBlock(id){
+  strip(program.main); strip(program.func);
+  if(target === id) target = "main";
+  function strip(arr){
+    for(var i=arr.length-1;i>=0;i--){
+      if(arr[i].id === id){ arr.splice(i,1); continue; }
+      if(arr[i].body) strip(arr[i].body);
+    }
+  }
+}
+function countBlocks(){
+  return walk(program.main) + walk(program.func);
+  function walk(arr){
+    var n = 0;
+    for(var i=0;i<arr.length;i++){ n++; if(arr[i].body) n += walk(arr[i].body); }
+    return n;
+  }
+}
+function addBlock(type){
+  var b = newBlock(type);
+  findBody(target).push(b);
+  if(b.body) target = b.id;
+  renderProgram();
+}
+
+/* --- vẽ chương trình --- */
+function renderProgram(){
+  paint(el("mainStack"), program.main, "main");
+  el("funcWrap").hidden = !level.hasFunc;
+  if(level.hasFunc) paint(el("funcStack"), program.func, "func");
+  el("progCount").textContent = countBlocks() + " lệnh · gọn nhất " + level.par;
+  renderCode();
+  function paint(host, list, slotId){
+    host.innerHTML = "";
+    list.forEach(function(b){ host.appendChild(blockEl(b)); });
+    host.appendChild(zoneEl(slotId, list.length === 0));
+  }
+}
+function zoneEl(slotId, empty){
+  var li = document.createElement("li");
+  var btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "dropzone" + (target === slotId ? " dropzone--on" : "");
+  btn.textContent = target === slotId ? "▾ lệnh mới vào đây" : (empty ? "trống — bấm để chọn" : "+ thêm vào cuối");
+  btn.addEventListener("click", function(e){ e.stopPropagation(); target = slotId; renderProgram(); });
+  li.appendChild(btn);
+  return li;
+}
+function blockEl(b){
+  var d = DEFS[b.type];
+  var li = document.createElement("li");
+  li.className = "blk blk--" + d.cat;
+  li.dataset.id = b.id;
+  var row = document.createElement("div");
+  row.className = "blk__row";
+  var label = document.createElement("span");
+  label.className = "blk__label";
+
+  if(b.type === "repeat"){
+    label.appendChild(document.createTextNode("Lặp lại "));
+    var sel = document.createElement("select");
+    sel.setAttribute("aria-label", "Số lần lặp");
+    for(var i=1;i<=12;i++){
+      var o = document.createElement("option");
+      o.value = String(i); o.textContent = String(i);
+      if(b.n === i) o.selected = true;
+      sel.appendChild(o);
+    }
+    sel.addEventListener("change", function(){ b.n = parseInt(sel.value, 10); renderCode(); });
+    label.appendChild(sel);
+    label.appendChild(document.createTextNode(" lần"));
+  } else if(b.type === "if" || b.type === "while"){
+    label.appendChild(document.createTextNode(d.label + " "));
+    var cs = document.createElement("select");
+    cs.setAttribute("aria-label", "Điều kiện");
+    Object.keys(CONDS).forEach(function(k){
+      var oo = document.createElement("option");
+      oo.value = k; oo.textContent = CONDS[k].label;
+      if(b.cond === k) oo.selected = true;
+      cs.appendChild(oo);
+    });
+    cs.addEventListener("change", function(){ b.cond = cs.value; renderCode(); });
+    label.appendChild(cs);
+  } else {
+    label.textContent = d.label;
+  }
+  row.appendChild(label);
+
+  var x = document.createElement("button");
+  x.type = "button"; x.className = "blk__x";
+  x.setAttribute("aria-label", "Xoá lệnh " + d.label);
+  x.textContent = "×";
+  x.addEventListener("click", function(e){ e.stopPropagation(); removeBlock(b.id); renderProgram(); });
+  row.appendChild(x);
+  li.appendChild(row);
+
+  if(b.body){
+    var ol = document.createElement("ol");
+    ol.className = "slot" + (target === b.id ? " slot--on" : "");
+    b.body.forEach(function(c){ ol.appendChild(blockEl(c)); });
+    ol.appendChild(zoneEl(b.id, b.body.length === 0));
+    li.appendChild(ol);
+  }
+  return li;
+}
+function markBlock(id, isErr){
+  var all = document.querySelectorAll(".blk");
+  for(var i=0;i<all.length;i++) all[i].classList.remove("blk--now", "blk--err");
+  if(!id) return;
+  var node = document.querySelector('.blk[data-id="' + id + '"]');
+  if(node) node.classList.add(isErr ? "blk--err" : "blk--now");
+}
+function renderCode(){
+  var out = [];
+  if(level.hasFunc){
+    out.push("def leo_bac():");
+    out = out.concat(program.func.length ? lines(program.func, 1) : ["    pass"]);
+    out.push("");
+  }
+  out.push("def main():");
+  out = out.concat(program.main.length ? lines(program.main, 1) : ["    pass"]);
+  el("codeView").firstChild.textContent = out.join("\n");
+
+  function lines(list, depth){
+    var pad = new Array(depth + 1).join("    "), res = [];
+    list.forEach(function(b){
+      if(b.type === "forward")      res.push(pad + "tien()");
+      else if(b.type === "left")    res.push(pad + "quay_trai()");
+      else if(b.type === "right")   res.push(pad + "quay_phai()");
+      else if(b.type === "collect") res.push(pad + "nhat()");
+      else if(b.type === "call")    res.push(pad + "leo_bac()");
+      else if(b.type === "repeat"){
+        res.push(pad + "for i in range(" + b.n + "):");
+        res = res.concat(b.body.length ? lines(b.body, depth + 1) : [pad + "    pass"]);
+      }
+      else if(b.type === "if"){
+        res.push(pad + "if " + CONDS[b.cond].code + ":");
+        res = res.concat(b.body.length ? lines(b.body, depth + 1) : [pad + "    pass"]);
+      }
+      else if(b.type === "while"){
+        res.push(pad + "while " + CONDS[b.cond].code + ":");
+        res = res.concat(b.body.length ? lines(b.body, depth + 1) : [pad + "    pass"]);
+      }
+    });
+    return res;
+  }
+}
+function renderSubtrack(){
+  var host = el("subtrack");
+  host.innerHTML = "";
+  chap.levels.forEach(function(li, n){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "subchip";
+    if(li === lvlIdx) b.setAttribute("aria-current", "true");
+    var s = progress.stars[String(li)] || 0;
+    b.innerHTML = "Màn " + (n + 1) + " · " + esc(LEVELS[li].name) + (s ? ' <span>' + "★".repeat(s) + "</span>" : "");
+    b.addEventListener("click", function(){ loadLevel(li); });
+    host.appendChild(b);
+  });
+}
+function renderTools(){
+  var host = el("tools");
+  host.innerHTML = "";
+  level.tools.forEach(function(t){
+    var d = DEFS[t];
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "tool tool--" + d.cat;
+    b.innerHTML = '<span class="tool__key" aria-hidden="true">' + d.key + "</span><span>" + esc(d.label) + "</span>";
+    b.addEventListener("click", function(){ addBlock(t); });
+    host.appendChild(b);
+  });
+}
+function loadLevel(i){
+  stopRun();
+  lvlIdx = i;
+  level = LEVELS[i];
+  level.idx = i;
+  program = {main:[], func:[]};
+  target = "main";
+  el("hintText").textContent = level.hint;
+  el("hintBox").hidden = false;
+  el("hintBox").open = false;
+  renderSubtrack();
+  renderTools();
+  renderProgram();
+  resetWorld();
+}
+
+/* ============================================================
+   ĐIỀU HƯỚNG CHƯƠNG
+   ============================================================ */
+function renderTrack(){
+  var host = el("track");
+  host.innerHTML = "";
+  COURSE.forEach(function(C, i){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip";
+    b.disabled = !chapUnlocked(i);
+    if(i === chapIdx) b.setAttribute("aria-current", "true");
+    b.innerHTML =
+      '<span class="chip__no"><span>' + (i < 9 ? "0" : "") + (i + 1) + "</span>" +
+      '<span class="chip__tick">' + (progress.done[i] ? "✓" : (chapUnlocked(i) ? "" : "🔒")) + "</span></span>" +
+      '<span class="chip__name">' + esc(C.name) + "</span>";
+    b.addEventListener("click", function(){ loadChapter(i); });
+    host.appendChild(b);
+  });
+}
+function loadChapter(i){
+  stopRun();
+  hideOver();
+  chapIdx = i;
+  chap = COURSE[i];
+
+  el("lessonNo").textContent = (i < 9 ? "0" : "") + (i + 1) + " / 0" + COURSE.length;
+  el("lessonTag").textContent = chap.tag;
+  el("lessonTitle").textContent = chap.title;
+  el("lessonBody").innerHTML = chap.body.map(function(p){ return "<p>" + p + "</p>"; }).join("");
+
+  if(chap.table){
+    var t = '<div class="tbl-wrap"><table><thead><tr>' +
+      chap.table.head.map(function(h){ return "<th>" + esc(h) + "</th>"; }).join("") +
+      "</tr></thead><tbody>" +
+      chap.table.rows.map(function(r){
+        return "<tr>" + r.map(function(c){ return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>";
+      }).join("") + "</tbody></table></div>";
+    el("lessonTable").innerHTML = t;
+  } else {
+    el("lessonTable").innerHTML = "";
+  }
+
+  ["viewSort","viewTrace","viewExpr","viewArena","viewProgram"].forEach(function(v){ el(v).hidden = true; });
+  el("toolsWrap").hidden = true;
+  el("hintBox").hidden = !chap.hint;
+  el("hintText").textContent = chap.hint || "";
+  el("stage").className = "stage stage--duo";
+
+  if(chap.game === "sort"){ el("viewSort").hidden = false; startSort(); }
+  else if(chap.game === "trace"){ el("viewTrace").hidden = false; startTrace(); }
+  else if(chap.game === "expr"){ el("viewExpr").hidden = false; startExpr(); }
+  else {
+    el("stage").className = "stage stage--trio";
+    el("viewArena").hidden = false;
+    el("viewProgram").hidden = false;
+    el("toolsWrap").hidden = false;
+    var first = chap.levels[0];
+    for(var k=0;k<chap.levels.length;k++){
+      if(!progress.stars[String(chap.levels[k])]){ first = chap.levels[k]; break; }
+    }
+    loadLevel(first);
+  }
+
+  renderTrack();
+  renderMeter();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* ============================================================
+   SỰ KIỆN CHUNG
+   ============================================================ */
+el("runBtn").addEventListener("click", function(){
+  if(timer){ stopRun(); setStatus("Đã dừng. Bấm Đặt lại để đưa robot về vạch xuất phát.", ""); }
+  else startRun();
+});
+el("stepBtn").addEventListener("click", stepOnce);
+el("resetBtn").addEventListener("click", resetWorld);
+Array.prototype.forEach.call(document.querySelectorAll(".speed__btn"), function(b){
+  b.addEventListener("click", function(){
+    speed = parseInt(b.dataset.speed, 10);
+    Array.prototype.forEach.call(document.querySelectorAll(".speed__btn"), function(o){
+      o.setAttribute("aria-pressed", o === b ? "true" : "false");
+    });
+    if(timer){ clearInterval(timer); timer = setInterval(tick, speed); }
+  });
+});
+el("themeBtn").addEventListener("click", function(){
+  var root = document.documentElement;
+  var now = root.getAttribute("data-theme");
+  if(!now) now = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  root.setAttribute("data-theme", now === "dark" ? "light" : "dark");
+});
+
+/* mở ở chương cao nhất đã mở khoá */
+var startAt = 0;
+for(var ci=0; ci<COURSE.length; ci++){ if(chapUnlocked(ci)) startAt = ci; }
+loadChapter(startAt);
+
+})();
+</script>
