@@ -367,8 +367,117 @@ td:last-child{color:var(--ink-soft)}
 .over__acts{display:flex;gap:var(--s2);justify-content:center;flex-wrap:wrap}
 
 /* ============================================================
+   IDE
+   ============================================================ */
+.langbar{display:flex;gap:2px;margin-bottom:var(--s2);border-bottom:1px solid var(--line)}
+.langtab{
+  background:none;border:1px solid transparent;border-bottom:0;border-radius:2px 2px 0 0;
+  padding:.35rem .75rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;
+  color:var(--ink-faint);margin-bottom:-1px;
+}
+.langtab:hover{color:var(--ink)}
+.langtab[aria-selected="true"]{
+  background:var(--paper);border-color:var(--line);border-bottom:1px solid var(--paper);
+  color:var(--amber);font-weight:700;
+}
+
+.ide{--gut:2.2rem;position:relative;border:1px solid var(--line);border-radius:2px;background:var(--paper)}
+.ide__scroll{max-height:min(52vh,420px);overflow-y:auto;overflow-x:hidden}
+.ide__code{position:relative;min-height:8rem}
+.ide__code::before{
+  content:"";position:absolute;top:0;bottom:0;left:calc(.7rem + var(--gut) + .28rem);
+  border-left:1px solid var(--line-soft);
+}
+.ide__hl,.ide__ta{
+  font-family:var(--mono);font-size:.8rem;line-height:1.7;tab-size:4;
+  padding:.6rem .7rem;margin:0;border:0;
+}
+.ide__hl{position:absolute;inset:0;pointer-events:none;overflow:hidden;color:var(--ink)}
+.ide__hl i{font-style:normal}
+.ln{display:flex}
+.ln__no{
+  flex:none;width:var(--gut);padding-right:.6rem;text-align:right;
+  color:var(--ink-faint);user-select:none;font-variant-numeric:tabular-nums;
+}
+.ln__code{flex:1;min-width:0;white-space:pre-wrap;overflow-wrap:break-word}
+.ln--err{background:var(--red-soft)}
+.ln--err .ln__no{color:var(--red);font-weight:700}
+.ln--now{background:var(--amber-soft)}
+.ln--now .ln__no{color:var(--amber);font-weight:700}
+.ide__ta{
+  display:block;width:100%;resize:none;overflow:hidden;outline:none;
+  padding-left:calc(.7rem + var(--gut) + .6rem);
+  background:transparent;color:transparent;caret-color:var(--amber);
+  white-space:pre-wrap;overflow-wrap:break-word;
+}
+.ide__ta::selection{background:var(--amber);color:var(--paper)}
+.c-kw{color:var(--indigo);font-weight:600}
+.c-str{color:var(--teal)}
+.c-num{color:var(--amber)}
+.c-cmt{color:var(--ink-faint);font-style:italic!important}
+.c-fn{color:var(--ink);font-weight:600}
+
+.ac{
+  position:absolute;z-index:8;min-width:15rem;max-height:11rem;overflow-y:auto;
+  background:var(--surface);border:1px solid var(--amber);border-radius:2px;
+  box-shadow:0 10px 26px var(--shadow);
+}
+.ac__row{
+  display:flex;gap:.5rem;align-items:baseline;width:100%;text-align:left;
+  padding:.28rem .5rem;background:none;border:0;font-family:var(--mono);font-size:.74rem;
+}
+.ac__row[aria-selected="true"]{background:var(--amber-soft)}
+.ac__row b{color:var(--amber);font-weight:700}
+.ac__row span{color:var(--ink-faint);font-family:var(--sans);font-size:.68rem;margin-left:auto}
+
+.kbd{
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;color:var(--ink-faint);
+  border:1px solid var(--line);border-radius:2px;padding:.2rem .4rem;
+}
+.cons{
+  margin-top:var(--s3);background:var(--paper);border:1px solid var(--line-soft);
+  border-radius:2px;padding:.5rem .65rem;font-family:var(--mono);font-size:.75rem;
+  line-height:1.75;max-height:11rem;overflow:auto;
+}
+.cons__l{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink-soft)}
+.cons__l--err{color:var(--red)}
+.cons__l--ok{color:var(--teal);font-weight:700}
+.cons__l--sys{color:var(--ink-faint)}
+
+/* --- bảng tra lệnh --- */
+.api{margin-top:var(--s3);display:flex;flex-direction:column;gap:2px}
+.api__row{
+  display:flex;gap:.5rem;align-items:baseline;padding:.22rem .4rem;
+  background:var(--surface-2);border-radius:2px;font-size:.78rem;
+}
+.api__row code{color:var(--indigo);font-weight:600;flex:none}
+.api__row span{color:var(--ink-soft);font-size:.72rem;margin-left:auto;text-align:right}
+
+/* --- đề bài / kết quả --- */
+.io{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s3)}
+.io__head{
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-faint);margin-bottom:var(--s1);
+}
+.io pre{
+  margin:0;background:var(--paper);border:1px solid var(--line-soft);border-radius:2px;
+  padding:.5rem .6rem;font-family:var(--mono);font-size:.76rem;line-height:1.7;
+  min-height:5rem;max-height:13rem;overflow:auto;white-space:pre-wrap;color:var(--ink-soft);
+}
+.io pre b{color:var(--red);font-weight:700;background:var(--red-soft)}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
+.stage--code{grid-template-columns:minmax(210px,.78fr) minmax(290px,1fr) minmax(340px,1.42fr)}
+@media (max-width:1240px){
+  .stage--code{grid-template-columns:1fr 1.25fr}
+  .stage--code .lesson-panel{grid-column:1/-1}
+}
+@media (max-width:860px){
+  .stage--code{grid-template-columns:1fr}
+  .io{grid-template-columns:1fr}
+}
 @media (max-width:1080px){
   .stage--trio{grid-template-columns:1fr 1fr}
   .stage--trio .arena-wrap{grid-column:1/-1;order:-1}
@@ -403,7 +512,7 @@ td:last-child{color:var(--ink-soft)}
   <main class="stage stage--duo" id="stage">
 
     <!-- ---------- LESSON (dùng chung mọi chương) ---------- -->
-    <section class="panel" id="lessonPanel" aria-labelledby="lessonTitle">
+    <section class="panel lesson-panel" id="lessonPanel" aria-labelledby="lessonTitle">
       <div class="panel__head"><span>Chương</span><span class="panel__count" id="lessonNo">01 / 07</span></div>
       <span class="tag" id="lessonTag">Kiểu dữ liệu</span>
       <h2 class="lesson__title" id="lessonTitle">Tiêu đề</h2>
@@ -416,6 +525,10 @@ td:last-child{color:var(--ink-soft)}
       <div id="toolsWrap" hidden>
         <div class="panel__head" style="margin-top:var(--s5)"><span>Bộ lệnh</span><span class="panel__count">Bấm để thêm</span></div>
         <div class="tools" id="tools"></div>
+      </div>
+      <div id="apiWrap" hidden>
+        <div class="panel__head" style="margin-top:var(--s5)"><span>Lệnh dùng được</span><span class="panel__count" id="apiLang">Python</span></div>
+        <div class="api" id="apiList"></div>
       </div>
     </section>
 
@@ -505,6 +618,47 @@ td:last-child{color:var(--ink-soft)}
         <div class="code__head">Chương trình này viết bằng chữ</div>
         <pre id="codeView"><code></code></pre>
       </div>
+    </section>
+
+    <!-- ---------- ĐỀ BÀI (chương viết chương trình) ---------- -->
+    <section class="panel" id="viewSpec" hidden aria-labelledby="specTitle">
+      <div class="panel__head"><span>Đề bài</span><span class="panel__count" id="specNo">1 / 6</span></div>
+      <div class="subtrack" id="taskTrack"></div>
+      <h3 class="lesson__title" id="specTitle" style="font-size:1.05rem">Đề bài</h3>
+      <div class="lesson__body" id="specText"></div>
+      <div class="io">
+        <div>
+          <div class="io__head">Kết quả mong đợi</div>
+          <pre id="specWant"></pre>
+        </div>
+        <div>
+          <div class="io__head">Chương trình của bạn in ra</div>
+          <pre id="specGot">chưa chạy</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- IDE ---------- -->
+    <section class="panel" id="viewIde" hidden aria-labelledby="ideHead">
+      <div class="panel__head"><span id="ideHead">Trình soạn thảo</span><span class="panel__count" id="ideFile">main.py</span></div>
+      <div class="langbar" id="langbar" role="tablist" aria-label="Chọn ngôn ngữ"></div>
+      <div class="ide">
+        <div class="ide__scroll" id="ideScroll">
+          <div class="ide__code" id="ideCode">
+            <div class="ide__hl" id="ideHl" aria-hidden="true"></div>
+            <textarea class="ide__ta" id="ideTa" spellcheck="false" autocomplete="off"
+              autocapitalize="off" autocorrect="off" aria-label="Vùng soạn thảo mã nguồn"></textarea>
+          </div>
+        </div>
+        <div class="ac" id="ideAc" hidden role="listbox" aria-label="Gợi ý lệnh"></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn--go" id="ideRun" type="button">Chạy</button>
+        <button class="btn" id="ideStop" type="button" disabled>Dừng</button>
+        <button class="btn" id="ideReset" type="button">Code mẫu</button>
+        <span class="kbd">Ctrl + Enter</span>
+      </div>
+      <div class="cons" id="ideCons"><p class="cons__l cons__l--sys">Viết code rồi bấm Chạy.</p></div>
     </section>
 
   </main>
@@ -657,6 +811,861 @@ var LEVELS = [
 ];
 
 /* ============================================================
+   BỘ THÔNG DỊCH 3 NGÔN NGỮ — Python / JavaScript / C++
+   Giá trị được gắn kiểu: {t:'int'|'float'|'str'|'bool', v}
+   ============================================================ */
+
+var LANGS = {
+  py:  {id:"py",  name:"Python",     file:"main.py",  indent:true,  cmt:"#",
+        kw:["def","if","elif","else","while","for","in","range","return","and","or","not","True","False","None","print","str","int","float","len"]},
+  js:  {id:"js",  name:"JavaScript", file:"main.js",  indent:false, cmt:"//",
+        kw:["function","if","else","while","for","let","const","var","return","true","false","null","console","log","String","Number","Math","floor"]},
+  cpp: {id:"cpp", name:"C++",        file:"main.cpp", indent:false, cmt:"//",
+        kw:["int","void","bool","float","double","string","auto","if","else","while","for","return","true","false","cout","endl","using","namespace","std","to_string"]}
+};
+
+function CodeErr(msg, line){ this.msg = msg; this.line = line || 0; this.isCode = true; }
+
+/* ============================================================
+   TOKENIZER
+   ============================================================ */
+var PUNCT = ["(",")","{","}","[","]",",",":",";","."];
+var OPS3 = ["==="];
+var OPS2 = ["==","!=","<=",">=","&&","||","++","--","+=","-=","*=","/=","**","//","<<"];
+var OPS1 = ["+","-","*","/","%","<",">","=","!"];
+
+function tokenize(src, D){
+  return D.indent ? tokPy(src) : tokBrace(src, D);
+}
+
+function scanLine(text, line, out, D){
+  var i = 0, n = text.length;
+  while(i < n){
+    var c = text[i];
+    if(c === " " || c === "\t" || c === "\r"){ i++; continue; }
+
+    // chú thích
+    if(c === "#"){ break; }
+    if(c === "/" && text[i+1] === "/"){
+      if(D && D.indent){ /* trong Python // là chia lấy nguyên */ }
+      else break;
+    }
+
+    // chuỗi
+    if(c === '"' || c === "'"){
+      var q = c, s = "", j = i + 1, closed = false;
+      while(j < n){
+        if(text[j] === "\\" && j + 1 < n){
+          var e = text[j+1];
+          s += (e === "n") ? "\n" : (e === "t") ? "\t" : e;
+          j += 2; continue;
+        }
+        if(text[j] === q){ closed = true; j++; break; }
+        s += text[j]; j++;
+      }
+      if(!closed) throw new CodeErr("Chuỗi chưa được đóng — thiếu dấu " + q + " ở cuối.", line);
+      out.push({t:"str", v:s, line:line});
+      i = j; continue;
+    }
+
+    // số
+    if(c >= "0" && c <= "9"){
+      var num = "", isF = false;
+      while(i < n && ((text[i] >= "0" && text[i] <= "9") || (text[i] === "." && !isF && text[i+1] >= "0" && text[i+1] <= "9"))){
+        if(text[i] === ".") isF = true;
+        num += text[i]; i++;
+      }
+      out.push({t:"num", v:parseFloat(num), f:isF, line:line});
+      continue;
+    }
+
+    // tên
+    if(/[A-Za-z_]/.test(c)){
+      var nm = "";
+      while(i < n && /[A-Za-z0-9_]/.test(text[i])){ nm += text[i]; i++; }
+      out.push({t:"name", v:nm, line:line});
+      continue;
+    }
+
+    // toán tử nhiều ký tự
+    var three = text.substr(i,3), two = text.substr(i,2), got = null;
+    if(OPS3.indexOf(three) >= 0){ got = three; i += 3; }
+    else if(OPS2.indexOf(two) >= 0){ got = two; i += 2; }
+    if(got){ out.push({t:"op", v:got === "===" ? "==" : got, line:line}); continue; }
+
+    if(PUNCT.indexOf(c) >= 0){ out.push({t:"punct", v:c, line:line}); i++; continue; }
+    if(OPS1.indexOf(c) >= 0){ out.push({t:"op", v:c, line:line}); i++; continue; }
+
+    throw new CodeErr("Không hiểu ký tự '" + c + "'.", line);
+  }
+}
+
+function tokPy(src){
+  var lines = src.split("\n"), out = [], stack = [0], i;
+  for(i = 0; i < lines.length; i++){
+    var raw = lines[i], line = i + 1;
+    var body = raw.replace(/\t/g, "    ");
+    var trimmed = body.trim();
+    if(trimmed === "" || trimmed.charAt(0) === "#") continue;
+
+    var ind = 0;
+    while(ind < body.length && body.charAt(ind) === " ") ind++;
+
+    if(ind > stack[stack.length-1]){
+      stack.push(ind);
+      out.push({t:"indent", line:line});
+    } else {
+      while(ind < stack[stack.length-1]){
+        stack.pop();
+        out.push({t:"dedent", line:line});
+      }
+      if(ind !== stack[stack.length-1]){
+        throw new CodeErr("Thụt lề không khớp với khối nào phía trên. Trong Python mỗi khối phải thụt đều nhau.", line);
+      }
+    }
+    var before = out.length;
+    scanLine(body, line, out, LANGS.py);
+    if(out.length > before) out.push({t:"nl", line:line});
+  }
+  while(stack.length > 1){ stack.pop(); out.push({t:"dedent", line:lines.length}); }
+  out.push({t:"eof", line:lines.length});
+  return out;
+}
+
+function tokBrace(src, D){
+  var lines = src.split("\n"), out = [], i;
+  var inBlock = false;
+  for(i = 0; i < lines.length; i++){
+    var text = lines[i], line = i + 1, t = text.trim();
+
+    // bỏ qua tiền xử lý C++ và using namespace
+    if(t.charAt(0) === "#") continue;
+    if(/^using\s+namespace\b/.test(t)) continue;
+
+    // chú thích khối /* */
+    if(inBlock){
+      var end = text.indexOf("*/");
+      if(end < 0) continue;
+      text = text.slice(end + 2); inBlock = false;
+    }
+    var op = text.indexOf("/*");
+    while(op >= 0){
+      var cl = text.indexOf("*/", op + 2);
+      if(cl < 0){ text = text.slice(0, op); inBlock = true; break; }
+      text = text.slice(0, op) + " " + text.slice(cl + 2);
+      op = text.indexOf("/*");
+    }
+    scanLine(text, line, out, D);
+  }
+  out.push({t:"eof", line:lines.length});
+  return out;
+}
+
+/* ============================================================
+   PARSER
+   ============================================================ */
+function parse(tokens, D){
+  var p = 0;
+  var DECL = {js:["let","const","var"], cpp:["int","float","double","bool","string","auto","long","char"]}[D.id] || [];
+  var FN = {py:["def"], js:["function"], cpp:["void","int","bool","float","double","string"]}[D.id];
+
+  function peek(k){ return tokens[p + (k||0)]; }
+  function at(t, v){ var tk = tokens[p]; return tk.t === t && (v === undefined || tk.v === v); }
+  function atName(v){ return at("name", v); }
+  function next(){ return tokens[p++]; }
+  function line(){ return tokens[p] ? tokens[p].line : 0; }
+  function expect(t, v, msg){
+    if(!at(t, v)) throw new CodeErr(msg || ("Thiếu '" + v + "'."), line());
+    return next();
+  }
+  function skipNl(){ while(at("nl")) next(); }
+  function skipSemi(){ while(at("punct", ";")) next(); }
+
+  /* ---------- biểu thức ---------- */
+  function parseExpr(){ return parseOr(); }
+  function parseOr(){
+    var l = parseAnd();
+    while(at("op","||") || atName("or")){ next(); l = {k:"bin", op:"||", l:l, r:parseAnd()}; }
+    return l;
+  }
+  function parseAnd(){
+    var l = parseNot();
+    while(at("op","&&") || atName("and")){ next(); l = {k:"bin", op:"&&", l:l, r:parseNot()}; }
+    return l;
+  }
+  function parseNot(){
+    if(at("op","!") || atName("not")){ var ln = line(); next(); return {k:"un", op:"!", e:parseNot(), line:ln}; }
+    return parseCmp();
+  }
+  function parseCmp(){
+    var l = parseAdd();
+    while(at("op","==")||at("op","!=")||at("op","<")||at("op",">")||at("op","<=")||at("op",">=")){
+      var o = next().v; l = {k:"bin", op:o, l:l, r:parseAdd()};
+    }
+    return l;
+  }
+  function parseAdd(){
+    var l = parseMul();
+    while(at("op","+")||at("op","-")){ var ln = line(); var o = next().v; l = {k:"bin", op:o, l:l, r:parseMul(), line:ln}; }
+    return l;
+  }
+  function parseMul(){
+    var l = parsePow();
+    while(at("op","*")||at("op","/")||at("op","%")||at("op","//")){
+      var ln = line(); var o = next().v; l = {k:"bin", op:o, l:l, r:parsePow(), line:ln};
+    }
+    return l;
+  }
+  function parsePow(){
+    var l = parseUnary();
+    if(at("op","**")){ next(); return {k:"bin", op:"**", l:l, r:parsePow()}; }
+    return l;
+  }
+  function parseUnary(){
+    if(at("op","-")){ next(); return {k:"un", op:"-", e:parseUnary()}; }
+    if(at("op","+")){ next(); return parseUnary(); }
+    return parsePrimary();
+  }
+  function parsePrimary(){
+    var tk = peek(), ln = tk.line;
+    if(tk.t === "num"){ next(); return {k:"lit", val:{t: tk.f ? "float" : "int", v: tk.v}}; }
+    if(tk.t === "str"){ next(); return {k:"lit", val:{t:"str", v: tk.v}}; }
+    if(tk.t === "punct" && tk.v === "("){
+      next(); var e = parseExpr();
+      expect("punct", ")", "Thiếu dấu ) đóng ngoặc.");
+      return e;
+    }
+    if(tk.t === "name"){
+      var nm = next().v;
+      while(at("punct",".")){ next(); nm += "." + expect("name", undefined, "Thiếu tên sau dấu chấm.").v; }
+      if(nm === "True" || nm === "true")  return {k:"lit", val:{t:"bool", v:true}};
+      if(nm === "False" || nm === "false") return {k:"lit", val:{t:"bool", v:false}};
+      if(at("punct","(")){
+        next();
+        var args = [];
+        if(!at("punct",")")){
+          args.push(parseExpr());
+          while(at("punct",",")){ next(); args.push(parseExpr()); }
+        }
+        expect("punct", ")", "Thiếu dấu ) sau danh sách tham số của " + nm + "().");
+        return {k:"call", name:nm, args:args, line:ln};
+      }
+      return {k:"var", name:nm, line:ln};
+    }
+    throw new CodeErr("Chỗ này cần một giá trị hoặc biểu thức.", ln);
+  }
+
+  /* ---------- khối lệnh ---------- */
+  function parseBlock(){
+    var body = [];
+    if(D.indent){
+      expect("punct", ":", "Thiếu dấu hai chấm ':' ở cuối dòng.");
+      if(!at("nl")) throw new CodeErr("Sau dấu ':' phải xuống dòng rồi thụt lề vào.", line());
+      next();
+      if(!at("indent")) throw new CodeErr("Khối lệnh sau dấu ':' phải được thụt lề vào trong.", line());
+      next();
+      while(!at("dedent") && !at("eof")){ var s = parseStmt(); if(s) body.push(s); skipNl(); }
+      if(at("dedent")) next();
+    } else {
+      if(at("punct","{")){
+        next();
+        while(!at("punct","}") && !at("eof")){ var s2 = parseStmt(); if(s2) body.push(s2); skipSemi(); }
+        expect("punct", "}", "Thiếu dấu } đóng khối lệnh.");
+      } else {
+        var s3 = parseStmt(); if(s3) body.push(s3); skipSemi();
+      }
+    }
+    return body;
+  }
+  function parseParenCond(){
+    if(D.indent) return parseExpr();
+    expect("punct", "(", "Điều kiện phải nằm trong dấu ngoặc tròn.");
+    var c = parseExpr();
+    expect("punct", ")", "Thiếu dấu ) sau điều kiện.");
+    return c;
+  }
+
+  /* ---------- câu lệnh ---------- */
+  function parseStmt(){
+    skipNl(); skipSemi();
+    if(at("eof")) return null;
+    var ln = line();
+
+    if(atName("if")){
+      next();
+      var cond = parseParenCond();
+      var then = parseBlock();
+      var alt = null;
+      skipNl();
+      if(atName("elif")){
+        tokens[p] = {t:"name", v:"if", line:tokens[p].line};   // elif → if
+        alt = [parseStmt()];
+      }
+      else if(atName("else")){
+        next();
+        if(atName("if")){ alt = [parseStmt()]; }
+        else alt = parseBlock();
+      }
+      return {k:"if", cond:cond, then:then, alt:alt, line:ln};
+    }
+
+    if(atName("while")){
+      next();
+      var wc = parseParenCond();
+      return {k:"while", cond:wc, body:parseBlock(), line:ln};
+    }
+
+    if(atName("for")){
+      next();
+      if(D.indent){
+        var v = expect("name", undefined, "Sau 'for' phải là tên biến đếm.").v;
+        if(!atName("in")) throw new CodeErr("Thiếu từ khoá 'in'. Cú pháp: for i in range(n):", line());
+        next();
+        if(!atName("range")) throw new CodeErr("Vòng for ở đây chỉ hỗ trợ range(). Ví dụ: for i in range(5):", line());
+        next();
+        expect("punct", "(", "Thiếu dấu ( sau range.");
+        var a1 = parseExpr(), a2 = null, a3 = null;
+        if(at("punct",",")){ next(); a2 = parseExpr(); }
+        if(at("punct",",")){ next(); a3 = parseExpr(); }
+        expect("punct", ")", "Thiếu dấu ) đóng range().");
+        return {k:"forRange", v:v, a1:a1, a2:a2, a3:a3, body:parseBlock(), line:ln};
+      }
+      expect("punct", "(", "Thiếu dấu ( sau 'for'.");
+      var init = parseSimple();
+      expect("punct", ";", "Vòng for cần 3 phần cách nhau bởi dấu ;");
+      var cnd = parseExpr();
+      expect("punct", ";", "Vòng for cần 3 phần cách nhau bởi dấu ;");
+      var upd = parseSimple();
+      expect("punct", ")", "Thiếu dấu ) đóng phần khai báo vòng for.");
+      return {k:"forC", init:init, cond:cnd, upd:upd, body:parseBlock(), line:ln};
+    }
+
+    if(atName("return")){
+      next();
+      var rv = null;
+      if(!at("nl") && !at("punct",";") && !at("punct","}") && !at("eof") && !at("dedent")) rv = parseExpr();
+      return {k:"return", e:rv, line:ln};
+    }
+
+    // định nghĩa hàm
+    if(FN.indexOf(peek().v) >= 0 && peek().t === "name"){
+      var save = p;
+      var kw = next().v;
+      if(at("name") && peek(1) && peek(1).t === "punct" && peek(1).v === "("){
+        var fname = next().v;
+        next(); // (
+        var params = [];
+        while(!at("punct",")") && !at("eof")){
+          if(at("name")){
+            var pn = next().v;
+            if(at("name")) pn = next().v;          // C++: int n  → lấy tên sau kiểu
+            params.push(pn);
+          }
+          if(at("punct",",")) next();
+          else break;
+        }
+        expect("punct", ")", "Thiếu dấu ) trong khai báo hàm " + fname + ".");
+        return {k:"func", name:fname, params:params, body:parseBlock(), line:ln};
+      }
+      p = save;
+    }
+
+    // cout << ... << endl;
+    if(atName("cout")){
+      next();
+      var parts = [];
+      while(at("op","<<")){
+        next();
+        if(atName("endl")){ next(); parts.push({k:"endl"}); }
+        else parts.push(parseExpr());
+      }
+      return {k:"cout", parts:parts, line:ln};
+    }
+
+    var st = parseSimple();
+    return st;
+  }
+
+  // khai báo / gán / gọi hàm — dùng cả trong for(...)
+  function parseSimple(){
+    var ln = line();
+    var isDecl = false;
+    if(peek().t === "name" && DECL.indexOf(peek().v) >= 0 && peek(1) && peek(1).t === "name"){
+      next(); isDecl = true;
+    }
+    if(peek().t === "name"){
+      var save = p;
+      var nm = next().v;
+      while(at("punct",".")){ next(); nm += "." + next().v; }
+      if(at("op","=")){ next(); return {k:"assign", name:nm, op:"=", e:parseExpr(), decl:isDecl, line:ln}; }
+      if(at("op","+=")){ next(); return {k:"assign", name:nm, op:"+=", e:parseExpr(), line:ln}; }
+      if(at("op","-=")){ next(); return {k:"assign", name:nm, op:"-=", e:parseExpr(), line:ln}; }
+      if(at("op","*=")){ next(); return {k:"assign", name:nm, op:"*=", e:parseExpr(), line:ln}; }
+      if(at("op","++")){ next(); return {k:"assign", name:nm, op:"++", line:ln}; }
+      if(at("op","--")){ next(); return {k:"assign", name:nm, op:"--", line:ln}; }
+      p = save;
+    }
+    var e = parseExpr();
+    return {k:"expr", e:e, line:ln};
+  }
+
+  var prog = [];
+  skipNl(); skipSemi();
+  while(!at("eof")){
+    var s = parseStmt();
+    if(s) prog.push(s);
+    skipNl(); skipSemi();
+    if(at("dedent")) next();
+  }
+  return prog;
+}
+
+/* ============================================================
+   GIÁ TRỊ & PHÉP TOÁN
+   ============================================================ */
+function isNum(v){ return v.t === "int" || v.t === "float"; }
+function truthy(v){
+  if(v.t === "bool") return v.v;
+  if(isNum(v)) return v.v !== 0;
+  if(v.t === "str") return v.v.length > 0;
+  return false;
+}
+function fmt(v, D){
+  if(v.t === "bool"){
+    if(D.id === "py") return v.v ? "True" : "False";
+    if(D.id === "cpp") return v.v ? "1" : "0";
+    return v.v ? "true" : "false";
+  }
+  if(v.t === "str") return v.v;
+  if(v.t === "float"){
+    if(D.id === "py") return Number.isInteger(v.v) ? v.v.toFixed(1) : String(v.v);
+    return String(v.v);
+  }
+  return String(v.v);
+}
+function binop(op, a, b, D, line){
+  if(op === "&&") return {t:"bool", v: truthy(a) && truthy(b)};
+  if(op === "||") return {t:"bool", v: truthy(a) || truthy(b)};
+
+  if(op === "=="){ return {t:"bool", v: (a.t === "str" || b.t === "str") ? (a.t === b.t && a.v === b.v) : a.v === b.v}; }
+  if(op === "!="){ return {t:"bool", v: !((a.t === "str" || b.t === "str") ? (a.t === b.t && a.v === b.v) : a.v === b.v)}; }
+  if(op === "<" || op === ">" || op === "<=" || op === ">="){
+    if(a.t === "str" || b.t === "str"){
+      if(a.t !== b.t) throw new CodeErr("Không so sánh được chuỗi với số.", line);
+    }
+    var r = op === "<" ? a.v < b.v : op === ">" ? a.v > b.v : op === "<=" ? a.v <= b.v : a.v >= b.v;
+    return {t:"bool", v:r};
+  }
+
+  if(op === "+"){
+    if(a.t === "str" && b.t === "str") return {t:"str", v: a.v + b.v};
+    if(a.t === "str" || b.t === "str"){
+      if(D.id === "py")
+        throw new CodeErr("Python không cộng được chuỗi với số. Đổi số thành chuỗi trước: str(" + fmt(isNum(a)?a:b, D) + ").", line);
+      if(D.id === "cpp")
+        throw new CodeErr("C++ không cộng được chuỗi với số. Dùng to_string(...) hoặc đẩy thẳng vào cout bằng <<.", line);
+      return {t:"str", v: fmt(a, D) + fmt(b, D)};
+    }
+  }
+  if(!isNum(a) || !isNum(b)) throw new CodeErr("Phép '" + op + "' cần hai giá trị số.", line);
+
+  var bothInt = (a.t === "int" && b.t === "int");
+  if(op === "+") return {t: bothInt ? "int" : "float", v: a.v + b.v};
+  if(op === "-") return {t: bothInt ? "int" : "float", v: a.v - b.v};
+  if(op === "*") return {t: bothInt ? "int" : "float", v: a.v * b.v};
+  if(op === "**") return {t: bothInt ? "int" : "float", v: Math.pow(a.v, b.v)};
+  if(op === "%"){
+    if(b.v === 0) throw new CodeErr("Không chia được cho 0.", line);
+    return {t: bothInt ? "int" : "float", v: a.v % b.v};
+  }
+  if(op === "//"){
+    if(b.v === 0) throw new CodeErr("Không chia được cho 0.", line);
+    return {t: bothInt ? "int" : "float", v: Math.floor(a.v / b.v)};
+  }
+  if(op === "/"){
+    if(b.v === 0) throw new CodeErr("Không chia được cho 0.", line);
+    if(D.id === "py") return {t:"float", v: a.v / b.v};
+    if(D.id === "cpp" && bothInt) return {t:"int", v: Math.trunc(a.v / b.v)};
+    return {t: Number.isInteger(a.v / b.v) ? "int" : "float", v: a.v / b.v};
+  }
+  throw new CodeErr("Chưa hỗ trợ phép '" + op + "'.", line);
+}
+
+/* ============================================================
+   THỰC THI  (generator: mỗi hành động robot là một bước)
+   ============================================================ */
+var RET = {};
+
+function makeCtx(D, api){
+  return {D:D, api:api, out:[], funcs:{}, budget:{n:0}, scopes:[{}], coutBuf:""};
+}
+function lookup(ctx, name, line){
+  for(var i = ctx.scopes.length - 1; i >= 0; i--){
+    if(Object.prototype.hasOwnProperty.call(ctx.scopes[i], name)) return ctx.scopes[i][name];
+  }
+  throw new CodeErr("Chưa có biến nào tên '" + name + "'. Phải gán giá trị cho nó trước khi dùng.", line);
+}
+function assign(ctx, name, val){
+  for(var i = ctx.scopes.length - 1; i >= 0; i--){
+    if(Object.prototype.hasOwnProperty.call(ctx.scopes[i], name)){ ctx.scopes[i][name] = val; return; }
+  }
+  ctx.scopes[ctx.scopes.length - 1][name] = val;
+}
+
+function* evalExpr(node, ctx){
+  var D = ctx.D;
+  if(node.k === "lit") return node.val;
+  if(node.k === "var") return lookup(ctx, node.name, node.line);
+  if(node.k === "un"){
+    var e = yield* evalExpr(node.e, ctx);
+    if(node.op === "!") return {t:"bool", v: !truthy(e)};
+    if(!isNum(e)) throw new CodeErr("Dấu trừ chỉ dùng được với số.", node.line);
+    return {t:e.t, v: -e.v};
+  }
+  if(node.k === "bin"){
+    var a = yield* evalExpr(node.l, ctx);
+    if(node.op === "&&" && !truthy(a)) return {t:"bool", v:false};
+    if(node.op === "||" && truthy(a)) return {t:"bool", v:true};
+    var b = yield* evalExpr(node.r, ctx);
+    return binop(node.op, a, b, D, node.line);
+  }
+  if(node.k === "call") return yield* callFn(node, ctx);
+  throw new CodeErr("Biểu thức không hợp lệ.", node.line);
+}
+
+function* callFn(node, ctx){
+  var D = ctx.D, name = node.name, line = node.line;
+  var args = [], i;
+  for(i = 0; i < node.args.length; i++) args.push(yield* evalExpr(node.args[i], ctx));
+
+  // hàm do người học tự định nghĩa
+  if(ctx.funcs[name]){
+    var f = ctx.funcs[name];
+    if(ctx.scopes.length > 60) throw new CodeErr("Hàm gọi lồng quá sâu — có thể hàm đang tự gọi chính nó mãi không dừng.", line);
+    var sc = {};
+    for(i = 0; i < f.params.length; i++) sc[f.params[i]] = args[i] || {t:"int", v:0};
+    ctx.scopes.push(sc);
+    var r = yield* execBlock(f.body, ctx);
+    ctx.scopes.pop();
+    return (r && r.ret) ? r.val : {t:"int", v:0};
+  }
+
+  // API robot
+  if(ctx.api && ctx.api[name]){
+    var res = ctx.api[name](args, line);
+    if(res.step) yield {line:line, act:name};
+    return res.value;
+  }
+
+  // in ra màn hình
+  if(name === "print" || name === "console.log"){
+    if(D.id === "cpp")
+      throw new CodeErr("Trong C++ hãy in bằng cout << ... << endl; chứ không có " + name + "().", line);
+    if(D.id === "py" && name !== "print")
+      throw new CodeErr("console.log là của JavaScript. Trong Python hãy dùng print(...).", line);
+    if(D.id === "js" && name !== "console.log")
+      throw new CodeErr("Trong JavaScript hãy dùng console.log(...) thay cho print(...).", line);
+    ctx.out.push(args.map(function(a){ return fmt(a, D); }).join(" "));
+    yield {line:line, act:"print"};
+    return {t:"int", v:0};
+  }
+
+  // chuyển kiểu
+  var a0 = args[0];
+  if(name === "str" || name === "String" || name === "to_string"){
+    if(D.id === "py" && name !== "str") throw new CodeErr("Trong Python hàm đổi sang chuỗi tên là str(...).", line);
+    return {t:"str", v: fmt(a0, ctx.D)};
+  }
+  if(name === "int" || name === "Number"){
+    if(a0.t === "str"){
+      var p2 = parseFloat(a0.v);
+      if(isNaN(p2)) throw new CodeErr("Không đổi được chuỗi \"" + a0.v + "\" thành số.", line);
+      return {t:"int", v: Math.trunc(p2)};
+    }
+    return {t:"int", v: Math.trunc(a0.v)};
+  }
+  if(name === "float" || name === "double") return {t:"float", v: a0.t === "str" ? parseFloat(a0.v) : a0.v};
+  if(name === "len") return {t:"int", v: String(a0.v).length};
+  if(name === "Math.floor") return {t:"int", v: Math.floor(a0.v)};
+  if(name === "Math.abs" || name === "abs") return {t: a0.t, v: Math.abs(a0.v)};
+  if(name === "pow") return {t:"int", v: Math.pow(a0.v, args[1].v)};
+
+  throw new CodeErr("Không có lệnh nào tên '" + name + "'. Xem lại danh sách lệnh ở cột bên trái.", line);
+}
+
+function* execBlock(body, ctx){
+  for(var i = 0; i < body.length; i++){
+    var r = yield* execStmt(body[i], ctx);
+    if(r && r.ret) return r;
+  }
+  return null;
+}
+
+function* execStmt(s, ctx){
+  var D = ctx.D;
+  if(++ctx.budget.n > 30000)
+    throw new CodeErr("Chương trình chạy quá lâu — nhiều khả năng có vòng lặp không bao giờ dừng.", s.line);
+
+  if(s.k === "expr"){ yield* evalExpr(s.e, ctx); return null; }
+
+  if(s.k === "assign"){
+    var val;
+    if(s.op === "++" || s.op === "--"){
+      var cur = lookup(ctx, s.name, s.line);
+      val = {t:cur.t, v: cur.v + (s.op === "++" ? 1 : -1)};
+    } else if(s.op === "="){
+      val = yield* evalExpr(s.e, ctx);
+    } else {
+      var old = lookup(ctx, s.name, s.line);
+      var rhs = yield* evalExpr(s.e, ctx);
+      val = binop(s.op.charAt(0), old, rhs, D, s.line);
+    }
+    assign(ctx, s.name, val);
+    return null;
+  }
+
+  if(s.k === "if"){
+    var c = yield* evalExpr(s.cond, ctx);
+    if(truthy(c)) return yield* execBlock(s.then, ctx);
+    if(s.alt) return yield* execBlock(s.alt, ctx);
+    return null;
+  }
+
+  if(s.k === "while"){
+    var spins = 0;
+    while(true){
+      var wc = yield* evalExpr(s.cond, ctx);
+      if(!truthy(wc)) break;
+      if(++spins > 5000) throw new CodeErr("Vòng lặp while chạy mãi không dừng. Điều kiện phải có lúc sai.", s.line);
+      var r1 = yield* execBlock(s.body, ctx);
+      if(r1 && r1.ret) return r1;
+    }
+    return null;
+  }
+
+  if(s.k === "forRange"){
+    var v1 = yield* evalExpr(s.a1, ctx);
+    var from = 0, to = v1.v, step = 1;
+    if(s.a2){ from = v1.v; to = (yield* evalExpr(s.a2, ctx)).v; }
+    if(s.a3) step = (yield* evalExpr(s.a3, ctx)).v;
+    if(step === 0) throw new CodeErr("Bước nhảy của range() không được bằng 0.", s.line);
+    var guard = 0;
+    for(var i = from; step > 0 ? i < to : i > to; i += step){
+      if(++guard > 5000) throw new CodeErr("Vòng for lặp quá nhiều lần.", s.line);
+      assign(ctx, s.v, {t:"int", v:i});
+      var r2 = yield* execBlock(s.body, ctx);
+      if(r2 && r2.ret) return r2;
+    }
+    return null;
+  }
+
+  if(s.k === "forC"){
+    if(s.init) yield* execStmt(s.init, ctx);
+    var g2 = 0;
+    while(true){
+      var fc = yield* evalExpr(s.cond, ctx);
+      if(!truthy(fc)) break;
+      if(++g2 > 5000) throw new CodeErr("Vòng for chạy mãi không dừng. Kiểm tra lại điều kiện và bước tăng.", s.line);
+      var r3 = yield* execBlock(s.body, ctx);
+      if(r3 && r3.ret) return r3;
+      if(s.upd) yield* execStmt(s.upd, ctx);
+    }
+    return null;
+  }
+
+  if(s.k === "func"){ ctx.funcs[s.name] = s; return null; }
+
+  if(s.k === "return"){
+    var rv = s.e ? yield* evalExpr(s.e, ctx) : {t:"int", v:0};
+    return {ret:true, val:rv};
+  }
+
+  if(s.k === "cout"){
+    for(var j = 0; j < s.parts.length; j++){
+      if(s.parts[j].k === "endl"){
+        ctx.out.push(ctx.coutBuf); ctx.coutBuf = "";
+        yield {line:s.line, act:"print"};
+        continue;
+      }
+      ctx.coutBuf += fmt(yield* evalExpr(s.parts[j], ctx), D);
+    }
+    return null;
+  }
+
+  throw new CodeErr("Câu lệnh không hợp lệ.", s.line);
+}
+
+function* runProgram(src, D, api, hold){
+  var prog = parse(tokenize(src, D), D);
+  var ctx = makeCtx(D, api);
+  if(hold) hold.ctx = ctx;
+  // nạp trước các định nghĩa hàm
+  var top = [], i;
+  for(i = 0; i < prog.length; i++){
+    if(prog[i].k === "func") ctx.funcs[prog[i].name] = prog[i];
+    else top.push(prog[i]);
+  }
+  if(D.id === "cpp" && ctx.funcs["main"]){
+    yield* execBlock(ctx.funcs["main"].body, ctx);
+  } else if(D.id === "js" && top.length === 0 && ctx.funcs["main"]){
+    yield* execBlock(ctx.funcs["main"].body, ctx);
+  } else {
+    yield* execBlock(top, ctx);
+  }
+  if(ctx.coutBuf !== ""){ ctx.out.push(ctx.coutBuf); ctx.coutBuf = ""; }
+  return ctx;
+}
+
+/* ============================================================
+   CHƯƠNG 8 — ĐIỀU KHIỂN ROBOT BẰNG CODE
+   ============================================================ */
+var cppWrap = function(body){
+  return "#include <iostream>\nusing namespace std;\n\nint main() {\n" + body + "\n    return 0;\n}\n";
+};
+
+var CODE_LEVELS = [
+{
+  name:"Đi thẳng", grid:["......"], start:{x:0,y:0,d:1}, goal:{x:5,y:0},
+  brief:"Bãi đáp cách robot 5 ô. Gọi lệnh <code>tien()</code> đủ số lần.",
+  hint:"Mỗi lần gọi tien() robot đi được đúng một ô. Ở đây cần 5 dòng giống nhau — hơi thừa, và chính vì thế màn sau mới có vòng lặp.",
+  code:{
+    py:"# Goi tien() du so lan de toi bai dap\ntien()\n",
+    js:"// Goi tien() du so lan de toi bai dap\ntien();\n",
+    cpp:cppWrap("    // Goi tien() du so lan de toi bai dap\n    tien();")
+  }
+},
+{
+  name:"Vòng lặp", grid:["..........."], start:{x:0,y:0,d:1}, goal:{x:10,y:0},
+  brief:"Lần này đường dài 10 ô. Đừng gõ 10 dòng — dùng vòng lặp.",
+  hint:"Python: for i in range(10). JavaScript và C++: for (int i = 0; i < 10; i++). Thân vòng lặp chỉ có một lệnh tien().",
+  code:{
+    py:"# Lap 10 lan, moi lan tien mot o\nfor i in range(10):\n    tien()\n",
+    js:"// Lap 10 lan, moi lan tien mot o\nfor (let i = 0; i < 10; i++) {\n  tien();\n}\n",
+    cpp:cppWrap("    // Lap 10 lan, moi lan tien mot o\n    for (int i = 0; i < 10; i++) {\n        tien();\n    }")
+  }
+},
+{
+  name:"Điều kiện", grid:[".*..*.*...*"], start:{x:0,y:0,d:1}, goal:{x:10,y:0},
+  brief:"Bốn viên pha lê nằm rải rác. Đi hết đường và chỉ nhặt khi ô đó thật sự có pha lê.",
+  hint:"Trong thân vòng lặp: tien() trước, rồi if co_pha_le() thì nhat(). Hàm co_pha_le() trả về True hoặc False — đúng kiểu bool ở chương 1.",
+  code:{
+    py:"for i in range(10):\n    tien()\n    # neu o nay co pha le thi nhat\n",
+    js:"for (let i = 0; i < 10; i++) {\n  tien();\n  // neu o nay co pha le thi nhat\n}\n",
+    cpp:cppWrap("    for (int i = 0; i < 10; i++) {\n        tien();\n        // neu o nay co pha le thi nhat\n    }")
+  }
+},
+{
+  name:"Lặp while", grid:["..........",".........#"], start:{x:0,y:1,d:1}, goal:{x:8,y:0},
+  brief:"Bạn <b>không biết trước</b> hành lang dài bao nhiêu ô. Đi tới khi đụng tường, rồi rẽ trái và tiến một bước lên bãi đáp.",
+  hint:"while duong_trong() thì tien(). Thoát vòng lặp là robot đã sát tường — lúc đó quay_trai() rồi tien().",
+  code:{
+    py:"# Di toi chung nao phia truoc con trong\nwhile duong_trong():\n    tien()\n\n# Ra khoi vong lap thi lam gi tiep?\n",
+    js:"// Di toi chung nao phia truoc con trong\nwhile (duong_trong()) {\n  tien();\n}\n\n// Ra khoi vong lap thi lam gi tiep?\n",
+    cpp:cppWrap("    while (duong_trong()) {\n        tien();\n    }\n\n    // Ra khoi vong lap thi lam gi tiep?")
+  }
+},
+{
+  name:"Hàm", grid:["*..*","....","....","*..*"], start:{x:0,y:3,d:0}, goal:{x:0,y:3},
+  brief:"Robot phải đi hết chu vi phòng, nhặt pha lê ở cả bốn góc, rồi về đúng chỗ cũ. Bốn cạnh giống hệt nhau — hãy viết một hàm rồi gọi bốn lần.",
+  hint:"Hàm di_mot_canh(): nhat(), rồi lặp 3 lần tien(), rồi quay_phai(). Sau đó gọi hàm đó 4 lần. Robot xuất phát quay lên trên.",
+  code:{
+    py:"def di_mot_canh():\n    # nhat pha le, di het canh, roi quay phai\n    pass\n\nfor c in range(4):\n    di_mot_canh()\n",
+    js:"function di_mot_canh() {\n  // nhat pha le, di het canh, roi quay phai\n}\n\nfor (let c = 0; c < 4; c++) {\n  di_mot_canh();\n}\n",
+    cpp:"#include <iostream>\nusing namespace std;\n\nvoid di_mot_canh() {\n    // nhat pha le, di het canh, roi quay phai\n}\n\nint main() {\n    for (int c = 0; c < 4; c++) {\n        di_mot_canh();\n    }\n    return 0;\n}\n"
+  }
+}
+];
+
+/* ============================================================
+   CHƯƠNG 9 — VIẾT CHƯƠNG TRÌNH, KHỚP KẾT QUẢ IN RA
+   ============================================================ */
+var OUT_TASKS = [
+{
+  name:"In ra màn hình",
+  brief:"In ra đúng một dòng chữ: <code>Xin chao Robot Lab</code>",
+  expect:["Xin chao Robot Lab"],
+  hint:"Chuỗi phải nằm trong dấu nháy. Python dùng print(...), JavaScript dùng console.log(...), C++ dùng cout << ... << endl;",
+  code:{ py:'# In ra dung mot dong\n', js:'// In ra dung mot dong\n', cpp:cppWrap("    // In ra dung mot dong") }
+},
+{
+  name:"Biến & toán tử",
+  brief:"Cho <code>a = 17</code> và <code>b = 5</code>. In ra 3 dòng: thương nguyên của a chia b, phần dư, rồi tổng a + b.",
+  expect:["3","2","22"],
+  hint:"Chia lấy nguyên mỗi ngôn ngữ viết một kiểu: Python a // b, JavaScript Math.floor(a / b), C++ a / b (hai số nguyên chia nhau thì tự cắt phần lẻ). Phần dư đều là a % b.",
+  code:{
+    py:"a = 17\nb = 5\n# in thuong nguyen, phan du, tong\n",
+    js:"let a = 17;\nlet b = 5;\n// in thuong nguyen, phan du, tong\n",
+    cpp:cppWrap("    int a = 17;\n    int b = 5;\n    // in thuong nguyen, phan du, tong")
+  }
+},
+{
+  name:"Chẵn hay lẻ",
+  brief:"Với các số từ 1 đến 5, mỗi số in ra một dòng: <code>chan</code> nếu số đó chẵn, <code>le</code> nếu lẻ.",
+  expect:["le","chan","le","chan","le"],
+  hint:"Một số chẵn khi chia 2 dư 0, tức là i % 2 == 0. Nhớ dùng == để so sánh, dấu = chỉ để gán.",
+  code:{
+    py:"for i in range(1, 6):\n    # chan hay le?\n    pass\n",
+    js:"for (let i = 1; i <= 5; i++) {\n  // chan hay le?\n}\n",
+    cpp:cppWrap("    for (int i = 1; i <= 5; i++) {\n        // chan hay le?\n    }")
+  }
+},
+{
+  name:"Tính tổng 1..10",
+  brief:"Tính tổng các số từ 1 đến 10 rồi in ra kết quả (một dòng duy nhất).",
+  expect:["55"],
+  hint:"Dùng một biến cộng dồn: đặt tong = 0 trước vòng lặp, trong vòng lặp cộng thêm i, in ra sau khi vòng lặp kết thúc. Để ý lệnh in phải nằm ngoài vòng lặp.",
+  code:{
+    py:"tong = 0\nfor i in range(1, 11):\n    # cong don vao tong\n    pass\n",
+    js:"let tong = 0;\nfor (let i = 1; i <= 10; i++) {\n  // cong don vao tong\n}\n",
+    cpp:cppWrap("    int tong = 0;\n    for (int i = 1; i <= 10; i++) {\n        // cong don vao tong\n    }")
+  }
+},
+{
+  name:"Bảng cửu chương",
+  brief:"In 5 dòng đầu của bảng nhân 3, đúng dạng: <code>3 x 1 = 3</code>",
+  expect:["3 x 1 = 3","3 x 2 = 6","3 x 3 = 9","3 x 4 = 12","3 x 5 = 15"],
+  hint:"Đây là chỗ kiểu dữ liệu lên tiếng: Python không cho nối chuỗi với số nên phải bọc str(i); JavaScript tự đổi giúp; C++ thì cứ đẩy thẳng từng phần vào cout bằng <<.",
+  code:{
+    py:"for i in range(1, 6):\n    # in dong dang: 3 x 1 = 3\n    pass\n",
+    js:"for (let i = 1; i <= 5; i++) {\n  // in dong dang: 3 x 1 = 3\n}\n",
+    cpp:cppWrap("    for (int i = 1; i <= 5; i++) {\n        // in dong dang: 3 x 1 = 3\n    }")
+  }
+},
+{
+  name:"FizzBuzz",
+  brief:"Với các số từ 1 đến 15: chia hết cho cả 3 và 5 thì in <code>FizzBuzz</code>, chỉ chia hết cho 3 thì in <code>Fizz</code>, chỉ chia hết cho 5 thì in <code>Buzz</code>, còn lại in chính số đó. Bài phỏng vấn kinh điển.",
+  expect:["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"],
+  hint:"Thứ tự kiểm tra rất quan trọng: phải xét chia hết cho 15 TRƯỚC, không thì số 15 sẽ rơi vào nhánh Fizz mất. Dùng elif (Python) hoặc else if (JavaScript, C++).",
+  code:{
+    py:"for i in range(1, 16):\n    # thu tu xet dieu kien rat quan trong\n    pass\n",
+    js:"for (let i = 1; i <= 15; i++) {\n  // thu tu xet dieu kien rat quan trong\n}\n",
+    cpp:cppWrap("    for (int i = 1; i <= 15; i++) {\n        // thu tu xet dieu kien rat quan trong\n    }")
+  }
+}
+];
+
+/* --- bảng tra lệnh hiện ở cột trái --- */
+var API_ROBOT = [
+  ["tien()","đi tới 1 ô"],
+  ["quay_trai()","quay trái 90°"],
+  ["quay_phai()","quay phải 90°"],
+  ["nhat()","nhặt pha lê"],
+  ["co_pha_le()","ô này có pha lê?"],
+  ["duong_trong()","phía trước đi được?"],
+  ["co_tuong()","phía trước có tường?"]
+];
+var API_OUT = {
+  py: [["print(x)","in một dòng"],["str(x)","số → chuỗi"],["int(x)","→ số nguyên"],["a // b","chia lấy nguyên"],["a % b","chia lấy dư"]],
+  js: [["console.log(x)","in một dòng"],["String(x)","số → chuỗi"],["Math.floor(x)","làm tròn xuống"],["a % b","chia lấy dư"]],
+  cpp:[["cout << x << endl;","in một dòng"],["to_string(x)","số → chuỗi"],["a / b","int chia int thì cắt lẻ"],["a % b","chia lấy dư"]]
+};
+var AC_WORDS = {
+  py: ["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","print","str","int","float","len","range","for","while","if","elif","else","def","return","and","or","not","True","False"],
+  js: ["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","console.log","String","Number","Math.floor","for","while","if","else","function","return","let","const","true","false"],
+  cpp:["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","cout","endl","to_string","for","while","if","else","return","int","bool","string","void","true","false"]
+};
+
+/* ============================================================
    GIÁO TRÌNH
    ============================================================ */
 var COURSE = [
@@ -744,6 +1753,26 @@ var COURSE = [
     "Màn cuối gộp tất cả: chuỗi lệnh, vòng lặp, điều kiện và lặp có điều kiện trong cùng một chương trình."
   ],
   hint:"Phần định nghĩa hàm nằm ngay dưới chương trình chính, ở cột bên phải."
+},
+{
+  tag:"Gõ code", name:"Gõ code điều khiển robot", game:"robotcode",
+  title:"Bỏ khối lệnh, gõ code thật",
+  body:[
+    "Từ đây không còn khối lệnh kéo thả. Bạn gõ chương trình bằng chữ, trong một trình soạn thảo có đánh số dòng, tô màu cú pháp và báo lỗi — <b>giống lúc lập trình thật</b>.",
+    "Chọn một trong ba ngôn ngữ ở đầu trình soạn thảo. Cùng một bài giải được bằng cả <b>Python</b>, <b>JavaScript</b> hay <b>C++</b>: cú pháp khác nhau, còn cách nghĩ thì y hệt những gì bạn vừa học.",
+    "Năm màn dưới đây kiểm tra lại đúng chương 4 đến 7: chuỗi lệnh, vòng lặp, điều kiện, lặp có điều kiện, và hàm. Bấm <b>Ctrl + Enter</b> để chạy nhanh."
+  ],
+  hint:""
+},
+{
+  tag:"Tự viết", name:"Tự viết chương trình", game:"output",
+  title:"Chương trình đúng là chương trình in ra đúng",
+  body:[
+    "Không còn robot. Bạn viết chương trình tính toán rồi in kết quả, và bài chỉ được tính là xong khi <b>từng dòng in ra khớp chính xác</b> với đề — dòng nào lệch sẽ được tô đỏ để bạn dò.",
+    "Sáu bài này quay lại kiểm tra chương 1 đến 3: <b>kiểu dữ liệu</b>, <b>biến &amp; phép gán</b>, <b>toán tử</b>. Đây cũng là lúc lộ ra khác biệt thật giữa ba ngôn ngữ — chẳng hạn Python không cho cộng chuỗi với số, còn JavaScript thì tự đổi giúp.",
+    "Bài cuối là FizzBuzz, câu hỏi phỏng vấn lập trình nổi tiếng nhất thế giới. Giải được nó nghĩa là bạn đã nắm đủ vòng lặp, điều kiện và toán tử chia dư."
+  ],
+  hint:""
 }
 ];
 
@@ -1511,6 +2540,424 @@ function loadLevel(i){
 }
 
 /* ============================================================
+   IDE — soạn thảo, chạy, chấm bài
+   ============================================================ */
+var codeMode = "robot";      // "robot" | "output"
+var codeIdx = 0;
+var curLang = "py";
+var ideRunner = null, ideTimer = null, ideHold = null, ideCharW = 0, ideLineH = 0;
+var acItems = [], acSel = 0, acStart = 0;
+
+if(!progress.code) progress.code = {};
+
+var TA = function(){ return el("ideTa"); };
+function draftKey(){ return codeMode + codeIdx + ":" + curLang; }
+
+/* --- tô màu cú pháp --- */
+function highlight(src, D){
+  var cmt = D.indent ? "#[^\\n]*" : "\\/\\/[^\\n]*|#[^\\n]*";
+  var re = new RegExp("(" + cmt + ")|(\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*')|(\\b\\d+(?:\\.\\d+)?\\b)|([A-Za-z_][A-Za-z0-9_]*)", "g");
+  var out = "", last = 0, m;
+  while((m = re.exec(src)) !== null){
+    out += esc(src.slice(last, m.index));
+    if(m[1])      out += '<i class="c-cmt">' + esc(m[1]) + "</i>";
+    else if(m[2]) out += '<i class="c-str">' + esc(m[2]) + "</i>";
+    else if(m[3]) out += '<i class="c-num">' + esc(m[3]) + "</i>";
+    else {
+      var w = m[4], after = src.charAt(re.lastIndex);
+      var cls = D.kw.indexOf(w) >= 0 ? "c-kw" : (after === "(" ? "c-fn" : "");
+      out += cls ? '<i class="' + cls + '">' + esc(w) + "</i>" : esc(w);
+    }
+    last = re.lastIndex;
+  }
+  out += esc(src.slice(last));
+  return out;
+}
+function ideRender(markLine, markKind){
+  var ta = TA(), src = ta.value, D = LANGS[curLang];
+  var lines = src.split("\n"), html = "", i;
+  for(i = 0; i < lines.length; i++){
+    var cls = "ln";
+    if(markLine === i + 1) cls += markKind === "err" ? " ln--err" : " ln--now";
+    html += '<div class="' + cls + '"><span class="ln__no">' + (i + 1) +
+            '</span><span class="ln__code">' + (highlight(lines[i], D) || "&nbsp;") + "</span></div>";
+  }
+  el("ideHl").innerHTML = html;
+  ta.style.height = "auto";
+  ta.style.height = ta.scrollHeight + "px";
+  progress.code[draftKey()] = src;
+}
+function ideSetSrc(src){ TA().value = src; ideRender(); }
+
+/* --- console --- */
+function consClear(){ el("ideCons").innerHTML = ""; }
+function consLine(text, kind){
+  var p = document.createElement("p");
+  p.className = "cons__l" + (kind ? " cons__l--" + kind : "");
+  p.textContent = text;
+  el("ideCons").appendChild(p);
+  el("ideCons").scrollTop = el("ideCons").scrollHeight;
+}
+
+/* --- API robot cho code --- */
+function robotApi(){
+  function boom(m, line){ throw new CodeErr(m, line); }
+  var ok = {t:"int", v:0};
+  return {
+    tien: function(a, line){
+      var nx = world.x + DIRS[world.d][0], ny = world.y + DIRS[world.d][1], c = cellAt(nx, ny);
+      if(c === null) boom("Robot đi ra ngoài bản đồ. Kiểm tra lại hướng quay.", line);
+      if(c === "#")  boom("Robot đâm vào tường. Cần quay hướng khác trước khi tiến.", line);
+      if(c === " ")  boom("Robot rơi xuống hố. Chỉ đi được trên các ô sàn sáng màu.", line);
+      world.x = nx; world.y = ny;
+      return {value:ok, step:true};
+    },
+    quay_trai: function(){ world.d = (world.d + 3) % 4; botAngle -= 90; return {value:ok, step:true}; },
+    quay_phai: function(){ world.d = (world.d + 1) % 4; botAngle += 90; return {value:ok, step:true}; },
+    nhat: function(a, line){
+      var k = world.x + "," + world.y;
+      if(!world.gems[k]) boom("Ô này không có pha lê. Lệnh nhat() chỉ dùng được khi robot đứng đúng ô có pha lê.", line);
+      delete world.gems[k]; world.left--;
+      return {value:ok, step:true};
+    },
+    co_pha_le:   function(){ return {value:{t:"bool", v: !!world.gems[world.x + "," + world.y]}, step:false}; },
+    duong_trong: function(){ return {value:{t:"bool", v: walkable(world.x + DIRS[world.d][0], world.y + DIRS[world.d][1])}, step:false}; },
+    co_tuong:    function(){ return {value:{t:"bool", v: !walkable(world.x + DIRS[world.d][0], world.y + DIRS[world.d][1])}, step:false}; }
+  };
+}
+function syncGems(){
+  var all = document.querySelectorAll("[data-gem]");
+  for(var i = 0; i < all.length; i++){
+    if(!world.gems[all[i].dataset.gem]) all[i].classList.add("gem--gone");
+  }
+}
+
+/* --- chạy --- */
+function ideStop(){
+  if(ideTimer){ clearInterval(ideTimer); ideTimer = null; }
+  ideRunner = null;
+  el("ideStop").disabled = true;
+  el("ideRun").disabled = false;
+}
+function ideRun(){
+  ideStop();
+  acHide();
+  consClear();
+  ideRender();
+  var src = TA().value;
+  save();                                   // giữ lại bản nháp qua lần mở sau
+  if(!src.trim()){ consLine("Trình soạn thảo đang trống.", "err"); return; }
+  if(codeMode === "robot") resetWorld();
+  else el("specGot").textContent = "";
+  ideHold = {};
+  ideRunner = runProgram(src, LANGS[curLang], codeMode === "robot" ? robotApi() : null, ideHold);
+  el("ideStop").disabled = false;
+  el("ideRun").disabled = true;
+  consLine("▸ Đang chạy " + LANGS[curLang].file + " …", "sys");
+  ideTimer = setInterval(ideTick, codeMode === "robot" ? speed : 130);
+  ideTick();
+}
+function ideTick(){
+  if(!ideRunner) return;
+  var r;
+  try{ r = ideRunner.next(); }
+  catch(e){ ideFail(e); return; }
+  if(r.done){ ideDone(r.value); return; }
+  var s = r.value;
+  ideRender(s.line, "now");
+  if(codeMode === "robot"){ drawBot(); syncGems(); updateGemCount(); }
+  else if(ideHold.ctx) el("specGot").textContent = ideHold.ctx.out.join("\n");
+}
+function ideFail(e){
+  ideStop();
+  if(e && e.isCode){
+    ideRender(e.line, "err");
+    consLine("✕ Dòng " + e.line + ": " + e.msg, "err");
+  } else {
+    consLine("✕ Lỗi không xác định: " + (e && e.message ? e.message : e), "err");
+  }
+  if(codeMode === "robot"){
+    setStatus("Chương trình dừng vì lỗi — xem console bên phải.", "bad");
+    el("bot").classList.add("bot--hit");
+    setTimeout(function(){ el("bot").classList.remove("bot--hit"); }, 420);
+  }
+}
+function ideDone(ctx){
+  ideStop();
+  ideRender();
+  if(codeMode === "robot"){
+    var onGoal = (world.x === level.goal.x && world.y === level.goal.y);
+    if(world.left > 0){
+      consLine("Chạy xong nhưng còn " + world.left + " viên pha lê chưa nhặt.", "err");
+      setStatus("Còn " + world.left + " viên pha lê chưa nhặt.", "bad"); return;
+    }
+    if(!onGoal){
+      consLine("Chạy xong nhưng robot không dừng ở bãi đáp.", "err");
+      setStatus("Robot không dừng ở bãi đáp.", "bad"); return;
+    }
+    consLine("✓ Robot đã tới bãi đáp.", "ok");
+    setStatus("Hoàn thành màn " + level.name + ".", "good");
+    codePassed();
+    return;
+  }
+  // chương output: so từng dòng
+  var got = (ctx && ctx.out) || [], want = OUT_TASKS[codeIdx].expect;
+  paintDiff(got, want);
+  var same = got.length === want.length && got.every(function(v, i){ return v === want[i]; });
+  if(same){ consLine("✓ Kết quả khớp hoàn toàn.", "ok"); codePassed(); return; }
+  var bad = -1;
+  for(var i = 0; i < Math.max(got.length, want.length); i++){
+    if(got[i] !== want[i]){ bad = i; break; }
+  }
+  if(got.length === 0) consLine("✕ Chương trình chạy xong nhưng chưa in ra gì cả.", "err");
+  else consLine("✕ Dòng in ra thứ " + (bad + 1) + " chưa đúng — mong đợi \"" +
+       (want[bad] === undefined ? "(không có dòng này)" : want[bad]) + "\", nhận được \"" +
+       (got[bad] === undefined ? "(thiếu dòng)" : got[bad]) + "\".", "err");
+}
+function paintDiff(got, want){
+  el("specWant").textContent = want.join("\n");
+  var n = Math.max(got.length, want.length), html = "";
+  for(var i = 0; i < n; i++){
+    var g = got[i];
+    if(g === undefined) continue;
+    html += (g === want[i]) ? esc(g) : "<b>" + esc(g) + "</b>";
+    if(i < n - 1) html += "\n";
+  }
+  el("specGot").innerHTML = html || "(chưa in ra gì)";
+}
+function codePassed(){
+  var pre = codeMode === "robot" ? "c" : "o";
+  var list = codeMode === "robot" ? CODE_LEVELS : OUT_TASKS;
+  progress.stars[pre + codeIdx] = 3; save();
+  renderCodeTrack();
+  var all = true, i;
+  for(i = 0; i < list.length; i++){ if(!progress.stars[pre + i]) all = false; }
+  if(all) markChapterDone(chapIdx);
+
+  var last = (codeIdx === list.length - 1);
+  var text = codeMode === "robot"
+    ? "Bạn vừa giải màn này bằng " + LANGS[curLang].name + ". Thử đổi sang ngôn ngữ khác và viết lại — logic y hệt, chỉ khác cú pháp."
+    : "Kết quả in ra khớp từng dòng với đề. Thử viết lại bài này bằng hai ngôn ngữ còn lại xem khác nhau chỗ nào.";
+  var next = null, label = "";
+  if(!last){ label = codeMode === "robot" ? "Màn tiếp theo" : "Bài tiếp theo"; next = function(){ loadCodeItem(codeIdx + 1); }; }
+  else if(all && chapIdx < COURSE.length - 1){ label = "Chương tiếp theo"; next = goNextChapter; }
+  else if(all) text += " Bạn đã đi hết toàn bộ khoá học — chín chương, ba ngôn ngữ.";
+  showOver(3, last && all ? "Xong chương!" : "Đúng rồi!", text, label, next, function(){
+    loadCodeItem(codeIdx);
+  });
+}
+
+/* --- chuyển ngôn ngữ / bài --- */
+function renderLangBar(){
+  var host = el("langbar");
+  host.innerHTML = "";
+  ["py","js","cpp"].forEach(function(id){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "langtab"; b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", id === curLang ? "true" : "false");
+    b.textContent = LANGS[id].name;
+    b.addEventListener("click", function(){ setLang(id); });
+    host.appendChild(b);
+  });
+  el("ideFile").textContent = LANGS[curLang].file;
+}
+function renderApiList(){
+  var rows = codeMode === "robot" ? API_ROBOT : API_OUT[curLang];
+  var host = el("apiList");
+  host.innerHTML = "";
+  rows.forEach(function(r){
+    var d = document.createElement("div");
+    d.className = "api__row";
+    d.innerHTML = "<code>" + esc(r[0]) + "</code><span>" + esc(r[1]) + "</span>";
+    host.appendChild(d);
+  });
+  el("apiLang").textContent = LANGS[curLang].name;
+}
+function setLang(id){
+  ideStop();
+  curLang = id;
+  renderLangBar(); renderApiList();
+  var saved = progress.code[draftKey()];
+  var list = codeMode === "robot" ? CODE_LEVELS : OUT_TASKS;
+  ideSetSrc(saved !== undefined ? saved : list[codeIdx].code[id]);
+  consClear(); consLine("Đã chuyển sang " + LANGS[id].name + ".", "sys");
+}
+function renderCodeTrack(){
+  var list = codeMode === "robot" ? CODE_LEVELS : OUT_TASKS;
+  var pre = codeMode === "robot" ? "c" : "o";
+  var host = el(codeMode === "robot" ? "subtrack" : "taskTrack");
+  host.innerHTML = "";
+  list.forEach(function(L, i){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "subchip";
+    if(i === codeIdx) b.setAttribute("aria-current", "true");
+    b.innerHTML = (i + 1) + " · " + esc(L.name) + (progress.stars[pre + i] ? " <span>✓</span>" : "");
+    b.addEventListener("click", function(){ loadCodeItem(i); });
+    host.appendChild(b);
+  });
+}
+function loadCodeItem(i){
+  ideStop();
+  hideOver();
+  save();                                   // chốt bản nháp của bài vừa rời đi
+  codeIdx = i;
+  var list = codeMode === "robot" ? CODE_LEVELS : OUT_TASKS;
+  var item = list[i];
+  el("hintBox").hidden = false;
+  el("hintBox").open = false;
+  el("hintText").textContent = item.hint;
+  renderCodeTrack(); renderLangBar(); renderApiList();
+
+  if(codeMode === "robot"){
+    level = item; level.par = 0;
+    resetWorld();
+    setStatus(stripTags(item.brief), "");
+  } else {
+    el("specNo").textContent = (i + 1) + " / " + OUT_TASKS.length;
+    el("specTitle").textContent = item.name;
+    el("specText").innerHTML = "<p>" + item.brief + "</p>";
+    el("specWant").textContent = item.expect.join("\n");
+    el("specGot").textContent = "chưa chạy";
+  }
+  var saved = progress.code[draftKey()];
+  ideSetSrc(saved !== undefined ? saved : item.code[curLang]);
+  consClear(); consLine("Viết code rồi bấm Chạy (hoặc Ctrl + Enter).", "sys");
+}
+function stripTags(s){ return String(s).replace(/<[^>]*>/g, ""); }
+
+/* --- gợi ý lệnh (autocomplete) --- */
+function acHide(){ el("ideAc").hidden = true; acItems = []; }
+function measureIde(){
+  var probe = document.createElement("span");
+  probe.style.cssText = "position:absolute;visibility:hidden;white-space:pre";
+  var cs = window.getComputedStyle(TA());
+  probe.style.font = cs.font;
+  probe.textContent = "00000000000000000000";
+  document.body.appendChild(probe);
+  ideCharW = probe.getBoundingClientRect().width / 20;
+  document.body.removeChild(probe);
+  ideLineH = parseFloat(cs.lineHeight) || 20;
+}
+function acShow(){
+  var ta = TA(), pos = ta.selectionStart;
+  var before = ta.value.slice(0, pos);
+  var m = /[A-Za-z_][A-Za-z0-9_.]*$/.exec(before);
+  if(!m || m[0].length < 1){ acHide(); return; }
+  var word = m[0];
+  acStart = pos - word.length;
+  var pool = AC_WORDS[curLang];
+  acItems = pool.filter(function(w){ return w.toLowerCase().indexOf(word.toLowerCase()) === 0 && w !== word; }).slice(0, 8);
+  if(acItems.length === 0){ acHide(); return; }
+  acSel = 0;
+  var host = el("ideAc");
+  host.innerHTML = "";
+  acItems.forEach(function(w, i){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "ac__row";
+    b.setAttribute("aria-selected", i === acSel ? "true" : "false");
+    b.innerHTML = "<b>" + esc(w.slice(0, word.length)) + "</b>" + esc(w.slice(word.length)) +
+                  "<span>" + (API_ROBOT.concat(API_OUT[curLang]).filter(function(r){ return r[0].indexOf(w) === 0; })[0] ?
+                  esc(API_ROBOT.concat(API_OUT[curLang]).filter(function(r){ return r[0].indexOf(w) === 0; })[0][1]) : "từ khoá") + "</span>";
+    b.addEventListener("mousedown", function(e){ e.preventDefault(); acSel = i; acAccept(); });
+    host.appendChild(b);
+  });
+  if(!ideCharW) measureIde();
+  var lines = before.split("\n");
+  var lineNo = lines.length - 1, col = lines[lines.length - 1].length;
+  var padL = parseFloat(window.getComputedStyle(ta).paddingLeft);
+  host.style.left = Math.min(padL + col * ideCharW, ta.clientWidth - 60) + "px";
+  host.style.top  = (10 + (lineNo + 1) * ideLineH - el("ideScroll").scrollTop) + "px";
+  host.hidden = false;
+}
+function acMove(d){
+  if(!acItems.length) return;
+  acSel = (acSel + d + acItems.length) % acItems.length;
+  var rows = el("ideAc").children;
+  for(var i = 0; i < rows.length; i++) rows[i].setAttribute("aria-selected", i === acSel ? "true" : "false");
+  if(rows[acSel]) rows[acSel].scrollIntoView({block:"nearest"});
+}
+function acAccept(){
+  if(!acItems.length) return false;
+  var ta = TA(), w = acItems[acSel];
+  var isFn = /\(\)$/.test(w) || API_ROBOT.some(function(r){ return r[0] === w + "()"; });
+  var ins = isFn ? w + "()" : w;
+  var caret = acStart + ins.length - (isFn ? 1 : 0);
+  ta.value = ta.value.slice(0, acStart) + ins + ta.value.slice(ta.selectionStart);
+  ta.selectionStart = ta.selectionEnd = caret;
+  acHide(); ideRender();
+  return true;
+}
+
+/* --- phím tắt trong trình soạn thảo --- */
+function ideKey(e){
+  var ta = TA();
+  if(!el("ideAc").hidden){
+    if(e.key === "ArrowDown"){ e.preventDefault(); acMove(1); return; }
+    if(e.key === "ArrowUp"){ e.preventDefault(); acMove(-1); return; }
+    if(e.key === "Escape"){ e.preventDefault(); acHide(); return; }
+    if(e.key === "Tab" || e.key === "Enter"){ e.preventDefault(); acAccept(); return; }
+  }
+  if((e.ctrlKey || e.metaKey) && e.key === "Enter"){ e.preventDefault(); ideRun(); return; }
+
+  if(e.key === "Tab"){
+    e.preventDefault();
+    insertAt(ta, "    ");
+    return;
+  }
+  if(e.key === "Enter"){
+    e.preventDefault();
+    var pos = ta.selectionStart, before = ta.value.slice(0, pos);
+    var cur = before.slice(before.lastIndexOf("\n") + 1);
+    var ind = (/^[ \t]*/.exec(cur) || [""])[0];
+    var trimmed = cur.trim();
+    var deeper = /[:{]$/.test(trimmed);
+    var closing = ta.value.charAt(pos) === "}";
+    var add = deeper ? ind + "    " : ind;
+    if(deeper && closing) insertAt(ta, "\n" + add + "\n" + ind, add.length + 1);
+    else insertAt(ta, "\n" + add);
+    return;
+  }
+  if(e.key === "(" || e.key === "\"" || e.key === "'" || e.key === "{" || e.key === "["){
+    var close = {"(":")", "\"":"\"", "'":"'", "{":"}", "[":"]"}[e.key];
+    e.preventDefault();
+    insertAt(ta, e.key + close, 1);
+    return;
+  }
+  if(e.key === ")" || e.key === "}" || e.key === "]" || e.key === "\""){
+    if(ta.value.charAt(ta.selectionStart) === e.key && ta.selectionStart === ta.selectionEnd){
+      e.preventDefault();
+      ta.selectionStart = ta.selectionEnd = ta.selectionStart + 1;
+      return;
+    }
+  }
+}
+function insertAt(ta, text, back){
+  var s = ta.selectionStart, e2 = ta.selectionEnd;
+  ta.value = ta.value.slice(0, s) + text + ta.value.slice(e2);
+  var caret = s + text.length - (back || 0);
+  ta.selectionStart = ta.selectionEnd = caret;
+  ideRender();
+}
+el("ideCode").addEventListener("mousedown", function(e){
+  if(e.target === el("ideCode") || e.target === el("ideHl")){ e.preventDefault(); TA().focus(); }
+});
+el("ideTa").addEventListener("keydown", ideKey);
+el("ideTa").addEventListener("input", function(){ ideRender(); acShow(); });
+el("ideTa").addEventListener("blur", function(){ setTimeout(acHide, 120); });
+el("ideTa").addEventListener("scroll", acHide);
+el("ideScroll").addEventListener("scroll", acHide);
+el("ideRun").addEventListener("click", ideRun);
+el("ideStop").addEventListener("click", function(){
+  ideStop();
+  consLine("Đã dừng.", "sys");
+});
+el("ideReset").addEventListener("click", function(){
+  var list = codeMode === "robot" ? CODE_LEVELS : OUT_TASKS;
+  ideSetSrc(list[codeIdx].code[curLang]);
+  consClear(); consLine("Đã khôi phục code mẫu.", "sys");
+});
+
+/* ============================================================
    ĐIỀU HƯỚNG CHƯƠNG
    ============================================================ */
 function renderTrack(){
@@ -1531,6 +2978,7 @@ function renderTrack(){
 }
 function loadChapter(i){
   stopRun();
+  ideStop();
   hideOver();
   chapIdx = i;
   chap = COURSE[i];
@@ -1552,8 +3000,9 @@ function loadChapter(i){
     el("lessonTable").innerHTML = "";
   }
 
-  ["viewSort","viewTrace","viewExpr","viewArena","viewProgram"].forEach(function(v){ el(v).hidden = true; });
+  ["viewSort","viewTrace","viewExpr","viewArena","viewProgram","viewSpec","viewIde"].forEach(function(v){ el(v).hidden = true; });
   el("toolsWrap").hidden = true;
+  el("apiWrap").hidden = true;
   el("hintBox").hidden = !chap.hint;
   el("hintText").textContent = chap.hint || "";
   el("stage").className = "stage stage--duo";
@@ -1561,6 +3010,22 @@ function loadChapter(i){
   if(chap.game === "sort"){ el("viewSort").hidden = false; startSort(); }
   else if(chap.game === "trace"){ el("viewTrace").hidden = false; startTrace(); }
   else if(chap.game === "expr"){ el("viewExpr").hidden = false; startExpr(); }
+  else if(chap.game === "robotcode" || chap.game === "output"){
+    codeMode = (chap.game === "robotcode") ? "robot" : "output";
+    el("stage").className = "stage stage--code";
+    el("viewIde").hidden = false;
+    el("apiWrap").hidden = false;
+    if(codeMode === "robot") el("viewArena").hidden = false;
+    else el("viewSpec").hidden = false;
+    var lst = codeMode === "robot" ? CODE_LEVELS : OUT_TASKS;
+    var pre = codeMode === "robot" ? "c" : "o";
+    var firstIdx = 0;
+    for(var q = 0; q < lst.length; q++){
+      if(!progress.stars[pre + q]){ firstIdx = q; break; }
+    }
+    loadCodeItem(firstIdx);
+    setTimeout(measureIde, 0);
+  }
   else {
     el("stage").className = "stage stage--trio";
     el("viewArena").hidden = false;
