@@ -11,22 +11,30 @@ không script bên ngoài — kể cả bộ thông dịch 3 ngôn ngữ cũng t
 
 | # | Chương | Game |
 |---|--------|------|
-| 01 | Kiểu dữ liệu | Phân loại 12 giá trị vào `int / float / str / bool / list`, có bẫy như `'7'`, `"True"`, `2.0` |
-| 02 | Biến & phép gán | Đoán trước kết quả, rồi máy chạy từng dòng và vẽ ô nhớ để đối chiếu |
-| 03 | Toán tử | 14 biểu thức: `// % ** == != and or not`, mỗi câu kèm giải thích |
+| 01 | Kiểu dữ liệu | Phân loại 20 giá trị vào `int / float / str / bool / list`, có bẫy như `'7'`, `"True"`, `2.0`, `"[1, 2]"` |
+| 02 | Biến & phép gán | 9 bài: đoán trước kết quả, rồi máy chạy từng dòng và vẽ ô nhớ để đối chiếu |
+| 03 | Toán tử | 24 biểu thức: `// % ** == != and or not`, mỗi câu kèm giải thích |
 | 04 | Chuỗi lệnh | Robot: đi thẳng, rẽ hướng, nhặt vật phẩm (3 màn) |
 | 05 | Vòng lặp | `Lặp lại N lần`, thân nhiều lệnh, vòng lặp lồng nhau (3 màn) |
 | 06 | Điều kiện | `Nếu…thì`, `Trong khi`, và lỗi vòng lặp vô hạn (2 màn) |
 | 07 | Hàm & tổng hợp | Định nghĩa `leo_bac()` rồi gọi lại, màn cuối gộp mọi khái niệm (2 màn) |
-| 08 | Gõ code điều khiển robot | Bỏ khối lệnh, viết code thật trong IDE — 5 màn kiểm tra lại chương 4–7 |
-| 09 | Tự viết chương trình | 6 bài in ra kết quả, chấm khớp từng dòng — kiểm tra lại chương 1–3, kết bằng FizzBuzz |
+| 08 | Gõ code điều khiển robot | Bỏ khối lệnh, viết code thật trong IDE — 9 màn kiểm tra lại chương 4–7 |
+| 09 | Tự viết chương trình | 18 bài toán, chấm khớp từng dòng in ra — kiểm tra lại chương 1–3 |
+
+### 18 bài toán ở chương 9
+
+Xếp từ dễ tới khó: in một dòng chữ · biến & toán tử · chẵn lẻ · tính tổng 1..10 ·
+bảng cửu chương · **FizzBuzz** · đổi chỗ hai biến · chu vi &amp; diện tích · đếm ngược ·
+số lớn nhất trong ba số · giai thừa · tổng các chữ số · đảo ngược số · **dãy Fibonacci** ·
+tam giác sao · xếp loại điểm · bỏ qua bằng `continue` · **tìm số nguyên tố**.
 
 ## Ba ngôn ngữ, một cách nghĩ
 
 Hai chương cuối cho chọn **Python**, **JavaScript** hoặc **C++**. Cùng một bài giải
 được bằng cả ba: cú pháp khác nhau, logic y hệt. Bộ thông dịch tự viết hỗ trợ biến,
-toán tử, `if/elif/else`, `while`, `for` (cả `range()` lẫn `for(;;)`), hàm có tham số và
-giá trị trả về, `print` / `console.log` / `cout << … << endl`.
+toán tử, `if/elif/else`, `while`, `for` (cả `range()` lẫn `for(;;)`), `break`,
+`continue`, hàm có tham số và giá trị trả về, `print` / `console.log` /
+`cout << … << endl`.
 
 Ngữ nghĩa được giữ đúng theo từng ngôn ngữ thay vì gộp làm một — đó chính là bài học:
 

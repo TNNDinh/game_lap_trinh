@@ -711,7 +711,15 @@ var TYPE_ITEMS = [
   {v:"False",        t:"bool",  why:"Giá trị sai của kiểu logic."},
   {v:'"True"',       t:"str",   why:"Có nháy thì nó là chữ, không phải giá trị đúng/sai."},
   {v:"[]",           t:"list",  why:"Danh sách rỗng vẫn là list, chỉ là chưa có phần tử nào."},
-  {v:"-15",          t:"int",   why:"Số âm nguyên vẫn thuộc kiểu int."}
+  {v:"-15",          t:"int",   why:"Số âm nguyên vẫn thuộc kiểu int."},
+  {v:'"0"',          t:"str",   why:"Số 0 trong nháy là chuỗi. Cộng nó với số sẽ lỗi, phải đổi kiểu trước."},
+  {v:"-2.5",         t:"float", why:"Số âm có phần thập phân vẫn là float."},
+  {v:"[True, False]",t:"list",  why:"Ngoặc vuông là list, kể cả khi bên trong chứa giá trị bool."},
+  {v:"1000000",      t:"int",   why:"Số nguyên dù lớn cỡ nào vẫn là int."},
+  {v:"''",           t:"str",   why:"Chuỗi rỗng vẫn là str — khác với không có gì."},
+  {v:"[3.14]",       t:"list",  why:"Một list chứa đúng một số thực thì bản thân nó vẫn là list, không phải float."},
+  {v:"9 > 4",        t:"bool",  why:"Mọi phép so sánh đều cho ra bool. Đây là cầu nối sang chương toán tử."},
+  {v:'"[1, 2]"',     t:"str",   why:"Trông như list nhưng nằm trong nháy nên chỉ là chuỗi ký tự."}
 ];
 
 /* ============================================================
@@ -747,6 +755,30 @@ var TRACE_TASKS = [
     ask:"Chạy xong, <code>n</code> bằng bao nhiêu?",
     opts:["10","16","2","22"], ans:"10",
     why:"Chạy tuần tự: n thành 16, rồi 16 - 6 = 10. Mỗi dòng làm việc với giá trị mới nhất."
+  },
+  {
+    code:["a = 1","b = 2","a = b","b = a"],
+    ask:"Chạy xong, <code>a</code> bằng bao nhiêu?",
+    opts:["2","1","3","0"], ans:"2",
+    why:"Đây là cách đổi chỗ hai biến SAI kinh điển. Dòng a = b đã ghi đè mất số 1, nên dòng sau b chỉ nhận lại chính số 2. Muốn đổi chỗ thật phải có biến tạm: tmp = a, a = b, b = tmp."
+  },
+  {
+    code:['s = "5"',"t = s + s"],
+    ask:"Chạy xong, <code>t</code> bằng bao nhiêu?",
+    opts:['"55"',"10","55",'"10"'], ans:'"55"',
+    why:"s là chuỗi nên dấu + nối hai chuỗi lại thành \"55\", chứ không cộng ra 10. Kiểu dữ liệu quyết định dấu + làm gì."
+  },
+  {
+    code:["n = 2","n = n * 3","n = n * 3"],
+    ask:"Chạy xong, <code>n</code> bằng bao nhiêu?",
+    opts:["18","12","6","8"], ans:"18",
+    why:"Nhân dồn hai lần: 2 thành 6, rồi 6 thành 18. Không phải 2 * 3 * 2."
+  },
+  {
+    code:["x = 7","y = x - 2","x = y - 2"],
+    ask:"Chạy xong, <code>x</code> bằng bao nhiêu?",
+    opts:["3","5","7","1"], ans:"3",
+    why:"y nhận 5, rồi x nhận 5 - 2 = 3. Giá trị 7 ban đầu của x đã bị ghi đè."
   }
 ];
 
@@ -767,7 +799,17 @@ var EXPR_TASKS = [
   {e:"True and False",o:["False","True"],                 a:"False", w:"and chỉ đúng khi cả hai vế cùng đúng."},
   {e:"True or False", o:["True","False"],                 a:"True",  w:"or chỉ sai khi cả hai vế cùng sai."},
   {e:"not (3 > 5)",   o:["True","False"],                 a:"True",  w:"3 > 5 là False, not đảo ngược nó thành True."},
-  {e:"(2 > 1) and (5 % 2 == 1)", o:["True","False"],      a:"True",  w:"Vế trái đúng, vế phải: 5 % 2 là 1 và 1 == 1 nên cũng đúng. Cả hai đúng thì and đúng."}
+  {e:"(2 > 1) and (5 % 2 == 1)", o:["True","False"],      a:"True",  w:"Vế trái đúng, vế phải: 5 % 2 là 1 và 1 == 1 nên cũng đúng. Cả hai đúng thì and đúng."},
+  {e:"10 % 3",        o:["1","3","0","3.33"],             a:"1",     w:"10 chia 3 được 3 dư 1. Toán tử % lấy phần dư đó."},
+  {e:"2 + 3 * 4 - 5", o:["9","15","13","19"],             a:"9",     w:"Nhân trước: 3 * 4 = 12. Rồi 2 + 12 - 5 = 9."},
+  {e:"(10 - 4) / 3",  o:["2.0","2","1.5","3"],            a:"2.0",   w:"Ngoặc cho 6, rồi 6 / 3 = 2. Nhưng dấu / luôn cho float nên Python in ra 2.0 chứ không phải 2."},
+  {e:"9 // 4 * 2",    o:["4","2","4.5","8"],              a:"4",     w:"// và * cùng mức ưu tiên nên làm từ trái sang: 9 // 4 = 2, rồi 2 * 2 = 4."},
+  {e:"10 // 3 + 10 % 3", o:["4","3","1","13"],            a:"4",     w:"Thương nguyên 3 cộng phần dư 1 bằng 4. Hai toán tử này hay đi cùng nhau."},
+  {e:"3 ** 2 + 4 ** 2", o:["25","49","14","24"],          a:"25",    w:"Luỹ thừa làm trước cộng: 9 + 16 = 25. Đúng là định lý Pythagoras với tam giác 3-4-5."},
+  {e:"not (5 == 5)",  o:["False","True"],                 a:"False", w:"5 == 5 là True, not đảo lại thành False."},
+  {e:"(4 > 2) or (1 > 3)", o:["True","False"],            a:"True",  w:"Vế trái đúng là đủ để or đúng — nó không cần xét tiếp vế phải."},
+  {e:'"abc" == "abc"',o:["True","False"],                 a:"True",  w:"Hai chuỗi giống nhau từng ký tự thì bằng nhau."},
+  {e:"15 % 4 == 3",   o:["True","False"],                 a:"True",  w:"15 % 4 là 3, và 3 == 3 nên đúng. Phép tính làm trước, so sánh làm sau."}
 ];
 
 /* ============================================================
@@ -825,11 +867,11 @@ var LEVELS = [
 
 var LANGS = {
   py:  {id:"py",  name:"Python",     file:"main.py",  indent:true,  cmt:"#",
-        kw:["def","if","elif","else","while","for","in","range","return","and","or","not","True","False","None","print","str","int","float","len"]},
+        kw:["def","if","elif","else","while","for","in","range","return","break","continue","and","or","not","True","False","None","print","str","int","float","len"]},
   js:  {id:"js",  name:"JavaScript", file:"main.js",  indent:false, cmt:"//",
-        kw:["function","if","else","while","for","let","const","var","return","true","false","null","console","log","String","Number","Math","floor"]},
+        kw:["function","if","else","while","for","let","const","var","return","break","continue","true","false","null","console","log","String","Number","Math","floor"]},
   cpp: {id:"cpp", name:"C++",        file:"main.cpp", indent:false, cmt:"//",
-        kw:["int","void","bool","float","double","string","auto","if","else","while","for","return","true","false","cout","endl","using","namespace","std","to_string"]}
+        kw:["int","void","bool","float","double","string","auto","if","else","while","for","return","break","continue","true","false","cout","endl","using","namespace","std","to_string"]}
 };
 
 function CodeErr(msg, line){ this.msg = msg; this.line = line || 0; this.isCode = true; }
@@ -1148,6 +1190,9 @@ function parse(tokens, D){
       return {k:"forC", init:init, cond:cnd, upd:upd, body:parseBlock(), line:ln};
     }
 
+    if(atName("break")){ next(); return {k:"break", line:ln}; }
+    if(atName("continue")){ next(); return {k:"continue", line:ln}; }
+
     if(atName("return")){
       next();
       var rv = null;
@@ -1404,7 +1449,7 @@ function* callFn(node, ctx){
 function* execBlock(body, ctx){
   for(var i = 0; i < body.length; i++){
     var r = yield* execStmt(body[i], ctx);
-    if(r && r.ret) return r;
+    if(r && (r.ret || r.brk || r.cont)) return r;   // return / break / continue đều thoát khối
   }
   return null;
 }
@@ -1446,7 +1491,7 @@ function* execStmt(s, ctx){
       if(!truthy(wc)) break;
       if(++spins > 5000) throw new CodeErr("Vòng lặp while chạy mãi không dừng. Điều kiện phải có lúc sai.", s.line);
       var r1 = yield* execBlock(s.body, ctx);
-      if(r1 && r1.ret) return r1;
+      if(r1){ if(r1.ret) return r1; if(r1.brk) break; }
     }
     return null;
   }
@@ -1462,7 +1507,7 @@ function* execStmt(s, ctx){
       if(++guard > 5000) throw new CodeErr("Vòng for lặp quá nhiều lần.", s.line);
       assign(ctx, s.v, {t:"int", v:i});
       var r2 = yield* execBlock(s.body, ctx);
-      if(r2 && r2.ret) return r2;
+      if(r2){ if(r2.ret) return r2; if(r2.brk) break; }
     }
     return null;
   }
@@ -1475,11 +1520,14 @@ function* execStmt(s, ctx){
       if(!truthy(fc)) break;
       if(++g2 > 5000) throw new CodeErr("Vòng for chạy mãi không dừng. Kiểm tra lại điều kiện và bước tăng.", s.line);
       var r3 = yield* execBlock(s.body, ctx);
-      if(r3 && r3.ret) return r3;
+      if(r3){ if(r3.ret) return r3; if(r3.brk) break; }   // continue thì rơi xuống, vẫn chạy bước tăng
       if(s.upd) yield* execStmt(s.upd, ctx);
     }
     return null;
   }
+
+  if(s.k === "break") return {brk:true};
+  if(s.k === "continue") return {cont:true};
 
   if(s.k === "func"){ ctx.funcs[s.name] = s; return null; }
 
@@ -1581,6 +1629,50 @@ var CODE_LEVELS = [
     js:"function di_mot_canh() {\n  // nhat pha le, di het canh, roi quay phai\n}\n\nfor (let c = 0; c < 4; c++) {\n  di_mot_canh();\n}\n",
     cpp:"#include <iostream>\nusing namespace std;\n\nvoid di_mot_canh() {\n    // nhat pha le, di het canh, roi quay phai\n}\n\nint main() {\n    for (int c = 0; c < 4; c++) {\n        di_mot_canh();\n    }\n    return 0;\n}\n"
   }
+},
+{
+  name:"Bậc thang dài", grid:["     .","    ..","   .. ","  ..  "," ..   ","..    "],
+  start:{x:0,y:5,d:1}, goal:{x:5,y:0},
+  brief:"Năm bậc thang giống hệt nhau. Đi lệch một ô là rơi xuống hố — chỉ đi được trên các ô sàn sáng màu.",
+  hint:"Một bậc gồm bốn lệnh: tien, quay_trai, tien, quay_phai. Bỏ cả bốn vào thân một vòng lặp chạy 5 lần.",
+  code:{
+    py:"# Mot bac gom 4 lenh. Co 5 bac.\nfor i in range(5):\n    tien()\n",
+    js:"// Mot bac gom 4 lenh. Co 5 bac.\nfor (let i = 0; i < 5; i++) {\n  tien();\n}\n",
+    cpp:cppWrap("    // Mot bac gom 4 lenh. Co 5 bac.\n    for (int i = 0; i < 5; i++) {\n        tien();\n    }")
+  }
+},
+{
+  name:"Quét hai hàng", grid:["*.*.*.",".*.*.*"],
+  start:{x:0,y:1,d:1}, goal:{x:0,y:0},
+  brief:"Sáu viên pha lê nằm so le trên hai hàng. Quét hết hàng dưới, lên hàng trên rồi quét ngược lại về bãi đáp.",
+  hint:"Mỗi hàng: lặp 5 lần { nếu có pha lê thì nhặt; tien }, xong vòng lặp thì nhặt thêm một lần cho ô cuối hàng. Rồi quay_trai hai lần để đổi hàng và đi ngược lại.",
+  code:{
+    py:"# Quet hang duoi\nfor i in range(5):\n    if co_pha_le():\n        nhat()\n    tien()\n\n# con o cuoi hang thi sao?\n",
+    js:"// Quet hang duoi\nfor (let i = 0; i < 5; i++) {\n  if (co_pha_le()) {\n    nhat();\n  }\n  tien();\n}\n\n// con o cuoi hang thi sao?\n",
+    cpp:cppWrap("    // Quet hang duoi\n    for (int i = 0; i < 5; i++) {\n        if (co_pha_le()) {\n            nhat();\n        }\n        tien();\n    }\n\n    // con o cuoi hang thi sao?")
+  }
+},
+{
+  name:"Hành lang gấp khúc", grid:["..*..# ","    .  ","    *  ","    .*.","    #  "],
+  start:{x:0,y:0,d:1}, goal:{x:6,y:3},
+  brief:"Hành lang gấp ba đoạn, mỗi đoạn dài bao nhiêu bạn không biết trước. Nhặt cả ba viên pha lê trên đường.",
+  hint:"Mỗi đoạn viết y hệt nhau: while duong_trong() { nếu có pha lê thì nhặt; tien }. Giữa các đoạn là quay_phai rồi quay_trai. Vì cả ba đoạn giống nhau, đây là chỗ hợp lý để viết một hàm.",
+  code:{
+    py:"# Doan 1: di toi khi cham tuong, nhat tren duong\nwhile duong_trong():\n    if co_pha_le():\n        nhat()\n    tien()\n\n# Re huong roi lam lai cho doan 2 va 3\n",
+    js:"// Doan 1: di toi khi cham tuong, nhat tren duong\nwhile (duong_trong()) {\n  if (co_pha_le()) {\n    nhat();\n  }\n  tien();\n}\n\n// Re huong roi lam lai cho doan 2 va 3\n",
+    cpp:cppWrap("    // Doan 1: di toi khi cham tuong, nhat tren duong\n    while (duong_trong()) {\n        if (co_pha_le()) {\n            nhat();\n        }\n        tien();\n    }\n\n    // Re huong roi lam lai cho doan 2 va 3")
+  }
+},
+{
+  name:"Tuần tra lớn", grid:["*.*.*",".....","*...*",".....","*.*.*"],
+  start:{x:0,y:4,d:0}, goal:{x:0,y:4},
+  brief:"Tám viên pha lê nằm quanh chu vi phòng 5×5. Đi hết một vòng, nhặt sạch, rồi về đúng chỗ cũ. Màn cuối gộp tất cả: hàm, vòng lặp có điều kiện, và điều kiện.",
+  hint:"Viết hàm di_het_canh(): while duong_trong() { nếu có pha lê thì nhặt; tien }, rồi quay_phai(). Gọi nó 4 lần. Pha lê ở góc sẽ được nhặt ở đầu cạnh tiếp theo — bạn không cần xử lý riêng.",
+  code:{
+    py:"def di_het_canh():\n    # di het mot canh, nhat tren duong, roi quay phai\n    pass\n\nfor c in range(4):\n    di_het_canh()\n",
+    js:"function di_het_canh() {\n  // di het mot canh, nhat tren duong, roi quay phai\n}\n\nfor (let c = 0; c < 4; c++) {\n  di_het_canh();\n}\n",
+    cpp:"#include <iostream>\nusing namespace std;\n\nvoid di_het_canh() {\n    // di het mot canh, nhat tren duong, roi quay phai\n}\n\nint main() {\n    for (int c = 0; c < 4; c++) {\n        di_het_canh();\n    }\n    return 0;\n}\n"
+  }
 }
 ];
 
@@ -1649,6 +1741,138 @@ var OUT_TASKS = [
     js:"for (let i = 1; i <= 15; i++) {\n  // thu tu xet dieu kien rat quan trong\n}\n",
     cpp:cppWrap("    for (int i = 1; i <= 15; i++) {\n        // thu tu xet dieu kien rat quan trong\n    }")
   }
+},
+{
+  name:"Đổi chỗ hai biến",
+  brief:"Cho <code>a = 3</code> và <code>b = 8</code>. Hãy đổi chỗ giá trị của chúng, rồi in <code>a</code> trước và <code>b</code> sau.",
+  expect:["8","3"],
+  hint:"Không gán trực tiếp a = b được — làm vậy là mất luôn số 3 (đúng như bài bạn đã gặp ở chương 2). Cần một biến tạm: tmp = a, a = b, b = tmp.",
+  code:{
+    py:"a = 3\nb = 8\n# doi cho a va b, roi in a truoc b sau\n",
+    js:"let a = 3;\nlet b = 8;\n// doi cho a va b, roi in a truoc b sau\n",
+    cpp:cppWrap("    int a = 3;\n    int b = 8;\n    // doi cho a va b, roi in a truoc b sau")
+  }
+},
+{
+  name:"Hình chữ nhật",
+  brief:"Hình chữ nhật dài 7, rộng 4. In chu vi ở dòng đầu, diện tích ở dòng sau.",
+  expect:["22","28"],
+  hint:"Chu vi bằng (dài + rộng) nhân 2 — nhớ đặt ngoặc, vì nhân làm trước cộng. Diện tích bằng dài nhân rộng.",
+  code:{
+    py:"dai = 7\nrong = 4\n# in chu vi roi dien tich\n",
+    js:"let dai = 7;\nlet rong = 4;\n// in chu vi roi dien tich\n",
+    cpp:cppWrap("    int dai = 7;\n    int rong = 4;\n    // in chu vi roi dien tich")
+  }
+},
+{
+  name:"Đếm ngược",
+  brief:"In các số từ 10 xuống 1, mỗi số một dòng.",
+  expect:["10","9","8","7","6","5","4","3","2","1"],
+  hint:"Python: range(10, 0, -1) — tham số thứ ba là bước nhảy, số âm nghĩa là đi lùi. JavaScript và C++: cho i chạy từ 10, điều kiện i >= 1, và dùng i-- thay cho i++.",
+  code:{
+    py:"# dem nguoc tu 10 ve 1\n",
+    js:"// dem nguoc tu 10 ve 1\n",
+    cpp:cppWrap("    // dem nguoc tu 10 ve 1")
+  }
+},
+{
+  name:"Số lớn nhất",
+  brief:"Cho ba số <code>a = 17</code>, <code>b = 42</code>, <code>c = 23</code>. In ra số lớn nhất.",
+  expect:["42"],
+  hint:"Cách dễ hiểu nhất: giả sử a là lớn nhất, đặt lon_nhat = a. Rồi nếu b lớn hơn lon_nhat thì cập nhật, sau đó xét c tương tự. Đây là mẫu 'giữ kỷ lục' dùng khắp nơi trong lập trình.",
+  code:{
+    py:"a = 17\nb = 42\nc = 23\n# tim va in so lon nhat\n",
+    js:"let a = 17;\nlet b = 42;\nlet c = 23;\n// tim va in so lon nhat\n",
+    cpp:cppWrap("    int a = 17;\n    int b = 42;\n    int c = 23;\n    // tim va in so lon nhat")
+  }
+},
+{
+  name:"Giai thừa",
+  brief:"Tính <code>5!</code> tức 1×2×3×4×5, rồi in kết quả.",
+  expect:["120"],
+  hint:"Giống bài tính tổng, nhưng biến cộng dồn đổi thành nhân dồn. Chú ý: giá trị khởi tạo phải là 1, không phải 0 — nhân với 0 thì kết quả luôn bằng 0.",
+  code:{
+    py:"# tinh 5! roi in ra\n",
+    js:"// tinh 5! roi in ra\n",
+    cpp:cppWrap("    // tinh 5! roi in ra")
+  }
+},
+{
+  name:"Tổng các chữ số",
+  brief:"Cho <code>n = 4729</code>. Tính tổng các chữ số của nó (4+7+2+9) rồi in kết quả.",
+  expect:["22"],
+  hint:"Hai phép toán quen thuộc: n % 10 lấy ra chữ số cuối, còn chia lấy nguyên cho 10 thì cắt bỏ chữ số cuối đó. Lặp bằng while chừng nào n còn lớn hơn 0.",
+  code:{
+    py:"n = 4729\n# lay tung chu so bang % 10 va // 10\n",
+    js:"let n = 4729;\n// lay tung chu so bang % 10 va Math.floor(n / 10)\n",
+    cpp:cppWrap("    int n = 4729;\n    // lay tung chu so bang % 10 va n / 10")
+  }
+},
+{
+  name:"Đảo ngược số",
+  brief:"Cho <code>n = 1234</code>. In ra số đó viết ngược lại: <code>4321</code>.",
+  expect:["4321"],
+  hint:"Vẫn là % 10 và chia lấy nguyên, nhưng lần này dồn vào kết quả: dao = dao * 10 + n % 10. Nhân 10 để đẩy các chữ số đã có sang trái một bậc.",
+  code:{
+    py:"n = 1234\ndao = 0\n# dao nguoc n roi in ra\n",
+    js:"let n = 1234;\nlet dao = 0;\n// dao nguoc n roi in ra\n",
+    cpp:cppWrap("    int n = 1234;\n    int dao = 0;\n    // dao nguoc n roi in ra")
+  }
+},
+{
+  name:"Dãy Fibonacci",
+  brief:"In 10 số đầu của dãy Fibonacci, mỗi số một dòng. Bắt đầu bằng 1 và 1, mỗi số sau bằng tổng hai số trước.",
+  expect:["1","1","2","3","5","8","13","21","34","55"],
+  hint:"Chỉ cần hai biến a và b, khởi tạo cả hai bằng 1. Mỗi vòng: in a, rồi tính số tiếp theo. Bạn sẽ cần biến tạm để không mất giá trị — đúng bài học đổi chỗ hai biến.",
+  code:{
+    py:"a = 1\nb = 1\n# in 10 so dau cua day\n",
+    js:"let a = 1;\nlet b = 1;\n// in 10 so dau cua day\n",
+    cpp:cppWrap("    int a = 1;\n    int b = 1;\n    // in 10 so dau cua day")
+  }
+},
+{
+  name:"Tam giác sao",
+  brief:"In một tam giác 5 dòng: dòng 1 có một dấu <code>*</code>, dòng 2 có hai dấu, cho tới dòng 5 có năm dấu.",
+  expect:["*","**","***","****","*****"],
+  hint:"Vòng lặp lồng nhau: vòng ngoài chạy từng dòng, vòng trong nối thêm dấu sao vào một chuỗi. Nhớ đặt lại chuỗi rỗng ở đầu mỗi dòng, và chỉ in sau khi vòng trong kết thúc.",
+  code:{
+    py:"for i in range(1, 6):\n    s = \"\"\n    # vong trong noi them dau sao vao s\n",
+    js:"for (let i = 1; i <= 5; i++) {\n  let s = \"\";\n  // vong trong noi them dau sao vao s\n}\n",
+    cpp:cppWrap("    for (int i = 1; i <= 5; i++) {\n        string s = \"\";\n        // vong trong noi them dau sao vao s\n    }")
+  }
+},
+{
+  name:"Xếp loại điểm",
+  brief:"Với các điểm từ 4 đến 9, mỗi điểm in ra một dòng xếp loại: từ 9 trở lên là <code>Xuat sac</code>, từ 8 là <code>Gioi</code>, từ 7 là <code>Kha</code>, từ 5 là <code>Trung binh</code>, còn lại là <code>Yeu</code>.",
+  expect:["Yeu","Trung binh","Trung binh","Kha","Gioi","Xuat sac"],
+  hint:"Chuỗi elif (Python) hoặc else if (JavaScript, C++) phải xét từ mốc CAO xuống thấp. Xét từ thấp lên là điểm 9 sẽ dính ngay nhánh 'từ 5 trở lên' và không bao giờ tới được Xuat sac.",
+  code:{
+    py:"for d in range(4, 10):\n    # xet tu moc cao xuong thap\n    pass\n",
+    js:"for (let d = 4; d <= 9; d++) {\n  // xet tu moc cao xuong thap\n}\n",
+    cpp:cppWrap("    for (int d = 4; d <= 9; d++) {\n        // xet tu moc cao xuong thap\n    }")
+  }
+},
+{
+  name:"Bỏ qua bằng continue",
+  brief:"Tính tổng các số chia hết cho 3 trong khoảng từ 1 đến 30, rồi in kết quả. Hãy dùng <code>continue</code> để bỏ qua các số không chia hết.",
+  expect:["165"],
+  hint:"Lệnh continue nhảy ngay sang vòng lặp tiếp theo, bỏ qua phần còn lại của thân vòng. Viết: nếu i % 3 khác 0 thì continue, còn không thì cộng i vào tổng.",
+  code:{
+    py:"tong = 0\nfor i in range(1, 31):\n    # dung continue de bo qua so khong chia het cho 3\n    pass\n",
+    js:"let tong = 0;\nfor (let i = 1; i <= 30; i++) {\n  // dung continue de bo qua so khong chia het cho 3\n}\n",
+    cpp:cppWrap("    int tong = 0;\n    for (int i = 1; i <= 30; i++) {\n        // dung continue de bo qua so khong chia het cho 3\n    }")
+  }
+},
+{
+  name:"Số nguyên tố",
+  brief:"In tất cả số nguyên tố từ 2 đến 20, mỗi số một dòng. Số nguyên tố là số chỉ chia hết cho 1 và chính nó.",
+  expect:["2","3","5","7","11","13","17","19"],
+  hint:"Với mỗi số n, giả sử nó là nguyên tố (một biến bool bằng true), rồi thử chia n cho mọi số từ 2 đến n-1. Chia hết một lần là đặt biến đó thành false và break để thoát sớm. Cuối cùng nếu biến còn true thì in n.",
+  code:{
+    py:"for n in range(2, 21):\n    la_nguyen_to = True\n    # thu chia n cho cac so tu 2 den n-1\n    if la_nguyen_to:\n        print(n)\n",
+    js:"for (let n = 2; n <= 20; n++) {\n  let la_nguyen_to = true;\n  // thu chia n cho cac so tu 2 den n-1\n  if (la_nguyen_to) {\n    console.log(n);\n  }\n}\n",
+    cpp:cppWrap("    for (int n = 2; n <= 20; n++) {\n        bool la_nguyen_to = true;\n        // thu chia n cho cac so tu 2 den n-1\n        if (la_nguyen_to) {\n            cout << n << endl;\n        }\n    }")
+  }
 }
 ];
 
@@ -1663,14 +1887,14 @@ var API_ROBOT = [
   ["co_tuong()","phía trước có tường?"]
 ];
 var API_OUT = {
-  py: [["print(x)","in một dòng"],["str(x)","số → chuỗi"],["int(x)","→ số nguyên"],["a // b","chia lấy nguyên"],["a % b","chia lấy dư"]],
-  js: [["console.log(x)","in một dòng"],["String(x)","số → chuỗi"],["Math.floor(x)","làm tròn xuống"],["a % b","chia lấy dư"]],
-  cpp:[["cout << x << endl;","in một dòng"],["to_string(x)","số → chuỗi"],["a / b","int chia int thì cắt lẻ"],["a % b","chia lấy dư"]]
+  py: [["print(x)","in một dòng"],["str(x)","số → chuỗi"],["int(x)","→ số nguyên"],["a // b","chia lấy nguyên"],["a % b","chia lấy dư"],["break","thoát vòng lặp"],["continue","sang vòng kế tiếp"]],
+  js: [["console.log(x)","in một dòng"],["String(x)","số → chuỗi"],["Math.floor(x)","làm tròn xuống"],["a % b","chia lấy dư"],["break","thoát vòng lặp"],["continue","sang vòng kế tiếp"]],
+  cpp:[["cout << x << endl;","in một dòng"],["to_string(x)","số → chuỗi"],["a / b","int chia int thì cắt lẻ"],["a % b","chia lấy dư"],["break","thoát vòng lặp"],["continue","sang vòng kế tiếp"]]
 };
 var AC_WORDS = {
-  py: ["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","print","str","int","float","len","range","for","while","if","elif","else","def","return","and","or","not","True","False"],
-  js: ["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","console.log","String","Number","Math.floor","for","while","if","else","function","return","let","const","true","false"],
-  cpp:["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","cout","endl","to_string","for","while","if","else","return","int","bool","string","void","true","false"]
+  py: ["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","print","str","int","float","len","range","for","while","if","elif","else","def","return","break","continue","and","or","not","True","False"],
+  js: ["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","console.log","String","Number","Math.floor","for","while","if","else","function","return","break","continue","let","const","true","false"],
+  cpp:["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong","cout","endl","to_string","for","while","if","else","return","break","continue","int","bool","string","void","true","false"]
 };
 
 /* ============================================================
@@ -1768,7 +1992,7 @@ var COURSE = [
   body:[
     "Từ đây không còn khối lệnh kéo thả. Bạn gõ chương trình bằng chữ, trong một trình soạn thảo có đánh số dòng, tô màu cú pháp và báo lỗi — <b>giống lúc lập trình thật</b>.",
     "Chọn một trong ba ngôn ngữ ở đầu trình soạn thảo. Cùng một bài giải được bằng cả <b>Python</b>, <b>JavaScript</b> hay <b>C++</b>: cú pháp khác nhau, còn cách nghĩ thì y hệt những gì bạn vừa học.",
-    "Năm màn dưới đây kiểm tra lại đúng chương 4 đến 7: chuỗi lệnh, vòng lặp, điều kiện, lặp có điều kiện, và hàm. Bấm <b>Ctrl + Enter</b> để chạy nhanh."
+    "Chín màn dưới đây kiểm tra lại đúng chương 4 đến 7: chuỗi lệnh, vòng lặp, điều kiện, lặp có điều kiện, và hàm. Càng về sau càng cần ghép nhiều thứ lại — màn cuối gói cả hàm, vòng lặp có điều kiện và điều kiện vào một chương trình. Bấm <b>Ctrl + Enter</b> để chạy nhanh."
   ],
   hint:""
 },
@@ -1777,8 +2001,8 @@ var COURSE = [
   title:"Chương trình đúng là chương trình in ra đúng",
   body:[
     "Không còn robot. Bạn viết chương trình tính toán rồi in kết quả, và bài chỉ được tính là xong khi <b>từng dòng in ra khớp chính xác</b> với đề — dòng nào lệch sẽ được tô đỏ để bạn dò.",
-    "Sáu bài này quay lại kiểm tra chương 1 đến 3: <b>kiểu dữ liệu</b>, <b>biến &amp; phép gán</b>, <b>toán tử</b>. Đây cũng là lúc lộ ra khác biệt thật giữa ba ngôn ngữ — chẳng hạn Python không cho cộng chuỗi với số, còn JavaScript thì tự đổi giúp.",
-    "Bài cuối là FizzBuzz, câu hỏi phỏng vấn lập trình nổi tiếng nhất thế giới. Giải được nó nghĩa là bạn đã nắm đủ vòng lặp, điều kiện và toán tử chia dư."
+    "Mười tám bài này quay lại kiểm tra chương 1 đến 3: <b>kiểu dữ liệu</b>, <b>biến &amp; phép gán</b>, <b>toán tử</b>. Đây cũng là lúc lộ ra khác biệt thật giữa ba ngôn ngữ — chẳng hạn Python không cho cộng chuỗi với số, còn JavaScript thì tự đổi giúp.",
+    "Bài dễ trước, khó sau: từ in một dòng chữ, qua đổi chỗ hai biến và tính tổng, tới FizzBuzz — câu hỏi phỏng vấn lập trình nổi tiếng nhất thế giới — rồi tam giác sao, dãy Fibonacci và cuối cùng là tìm số nguyên tố. Hai bài chót cần <code>break</code> và <code>continue</code>, hai lệnh điều khiển vòng lặp mà bạn chưa gặp ở phần khối lệnh."
   ],
   hint:""
 }
