@@ -405,8 +405,11 @@ td:last-child{color:var(--ink-soft)}
 .ln--now{background:var(--amber-soft)}
 .ln--now .ln__no{color:var(--amber);font-weight:700}
 .ide__ta{
+  /* padding-left phải bằng .7rem (padding của .ide__hl) + var(--gut).
+     KHÔNG cộng thêm padding-right của .ln__no: box-sizing:border-box nên
+     width:var(--gut) đã bao gồm nó rồi. Cộng thừa là chữ lệch khỏi con trỏ. */
   display:block;width:100%;resize:none;overflow:hidden;outline:none;
-  padding-left:calc(.7rem + var(--gut) + .6rem);
+  padding-left:calc(.7rem + var(--gut));
   background:transparent;color:transparent;caret-color:var(--amber);
   white-space:pre-wrap;overflow-wrap:break-word;
 }
@@ -429,6 +432,11 @@ td:last-child{color:var(--ink-soft)}
 .ac__row[aria-selected="true"]{background:var(--amber-soft)}
 .ac__row b{color:var(--amber);font-weight:700}
 .ac__row span{color:var(--ink-faint);font-family:var(--sans);font-size:.68rem;margin-left:auto}
+.ac__tip{
+  position:sticky;bottom:0;padding:.24rem .5rem;background:var(--surface-2);
+  border-top:1px solid var(--line-soft);font-family:var(--mono);font-size:.62rem;
+  letter-spacing:.06em;color:var(--ink-faint);
+}
 
 .kbd{
   font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;color:var(--ink-faint);
@@ -2842,7 +2850,7 @@ function acShow(){
   var ta = TA(), pos = ta.selectionStart;
   var before = ta.value.slice(0, pos);
   var m = /[A-Za-z_][A-Za-z0-9_.]*$/.exec(before);
-  if(!m || m[0].length < 1){ acHide(); return; }
+  if(!m || m[0].length < 2){ acHide(); return; }   // ít nhất 2 chữ, đỡ nhảy popup liên tục
   var word = m[0];
   acStart = pos - word.length;
   var pool = AC_WORDS[curLang];
@@ -2861,6 +2869,10 @@ function acShow(){
     b.addEventListener("mousedown", function(e){ e.preventDefault(); acSel = i; acAccept(); });
     host.appendChild(b);
   });
+  var tip = document.createElement("div");
+  tip.className = "ac__tip";
+  tip.textContent = "Tab chèn · ↑↓ chọn · Esc bỏ";
+  host.appendChild(tip);
   if(!ideCharW) measureIde();
   var lines = before.split("\n");
   var lineNo = lines.length - 1, col = lines[lines.length - 1].length;
@@ -2872,70 +2884,105 @@ function acShow(){
 function acMove(d){
   if(!acItems.length) return;
   acSel = (acSel + d + acItems.length) % acItems.length;
-  var rows = el("ideAc").children;
+  var rows = el("ideAc").querySelectorAll(".ac__row");
   for(var i = 0; i < rows.length; i++) rows[i].setAttribute("aria-selected", i === acSel ? "true" : "false");
   if(rows[acSel]) rows[acSel].scrollIntoView({block:"nearest"});
 }
+var FN_WORDS = ["tien","quay_trai","quay_phai","nhat","co_pha_le","duong_trong","co_tuong",
+                "print","console.log","str","int","float","len","String","Number",
+                "Math.floor","to_string","range","pow","abs"];
 function acAccept(){
   if(!acItems.length) return false;
   var ta = TA(), w = acItems[acSel];
-  var isFn = /\(\)$/.test(w) || API_ROBOT.some(function(r){ return r[0] === w + "()"; });
+  var isFn = FN_WORDS.indexOf(w) >= 0;
   var ins = isFn ? w + "()" : w;
-  var caret = acStart + ins.length - (isFn ? 1 : 0);
-  ta.value = ta.value.slice(0, acStart) + ins + ta.value.slice(ta.selectionStart);
-  ta.selectionStart = ta.selectionEnd = caret;
-  acHide(); ideRender();
+  ta.setSelectionRange(acStart, ta.selectionEnd); // chọn phần chữ đang gõ dở
+  acHide();
+  insertAt(ta, ins, isFn ? 1 : 0);                // execCommand thay chỗ đã chọn, giữ Ctrl+Z
   return true;
 }
 
 /* --- phím tắt trong trình soạn thảo --- */
+var PAIR = {"(":")", "{":"}", "[":"]", '"':'"', "'":"'"};
+
 function ideKey(e){
   var ta = TA();
+  var caretAt = ta.selectionStart, noSel = (ta.selectionStart === ta.selectionEnd);
+  var nextCh = ta.value.charAt(caretAt);
+
+  // popup gợi ý: CHỈ nhận bằng Tab. Enter luôn là xuống dòng, không bị popup ăn mất.
   if(!el("ideAc").hidden){
     if(e.key === "ArrowDown"){ e.preventDefault(); acMove(1); return; }
     if(e.key === "ArrowUp"){ e.preventDefault(); acMove(-1); return; }
     if(e.key === "Escape"){ e.preventDefault(); acHide(); return; }
-    if(e.key === "Tab" || e.key === "Enter"){ e.preventDefault(); acAccept(); return; }
+    if(e.key === "Tab"){ e.preventDefault(); acAccept(); return; }
+    if(e.key === "Enter"){ acHide(); }          // đóng popup rồi xuống dòng như thường
   }
   if((e.ctrlKey || e.metaKey) && e.key === "Enter"){ e.preventDefault(); ideRun(); return; }
+  if(e.ctrlKey || e.metaKey || e.altKey) return;   // để nguyên Ctrl+Z, Ctrl+C, Ctrl+A…
 
   if(e.key === "Tab"){
     e.preventDefault();
     insertAt(ta, "    ");
     return;
   }
+
   if(e.key === "Enter"){
     e.preventDefault();
-    var pos = ta.selectionStart, before = ta.value.slice(0, pos);
+    var before = ta.value.slice(0, caretAt);
     var cur = before.slice(before.lastIndexOf("\n") + 1);
     var ind = (/^[ \t]*/.exec(cur) || [""])[0];
-    var trimmed = cur.trim();
-    var deeper = /[:{]$/.test(trimmed);
-    var closing = ta.value.charAt(pos) === "}";
+    var deeper = /[:{]$/.test(cur.trim());
     var add = deeper ? ind + "    " : ind;
-    if(deeper && closing) insertAt(ta, "\n" + add + "\n" + ind, add.length + 1);
+    if(deeper && nextCh === "}") insertAt(ta, "\n" + add + "\n" + ind, ind.length + 1);
     else insertAt(ta, "\n" + add);
     return;
   }
-  if(e.key === "(" || e.key === "\"" || e.key === "'" || e.key === "{" || e.key === "["){
-    var close = {"(":")", "\"":"\"", "'":"'", "{":"}", "[":"]"}[e.key];
+
+  // gõ ký tự đóng mà phía trước vừa tự thêm đúng ký tự đó → chỉ bước qua.
+  // Phải xét TRƯỚC nhánh tự đóng, nếu không dấu nháy sẽ bị nhân đôi mãi.
+  if(noSel && nextCh === e.key && (e.key === ")" || e.key === "}" || e.key === "]" || e.key === '"' || e.key === "'")){
     e.preventDefault();
-    insertAt(ta, e.key + close, 1);
+    ta.selectionStart = ta.selectionEnd = caretAt + 1;
     return;
   }
-  if(e.key === ")" || e.key === "}" || e.key === "]" || e.key === "\""){
-    if(ta.value.charAt(ta.selectionStart) === e.key && ta.selectionStart === ta.selectionEnd){
-      e.preventDefault();
-      ta.selectionStart = ta.selectionEnd = ta.selectionStart + 1;
-      return;
+
+  // tự đóng ngoặc — chỉ khi phía sau là cuối dòng, khoảng trắng hoặc ngoặc đóng,
+  // để không chèn bừa vào giữa chữ đang có
+  if(PAIR[e.key] && noSel && (nextCh === "" || /[\s)\]},;]/.test(nextCh))){
+    e.preventDefault();
+    insertAt(ta, e.key + PAIR[e.key], 1);
+    return;
+  }
+
+  // Backspace giữa một cặp vừa tự thêm → xoá cả hai
+  if(e.key === "Backspace" && noSel && PAIR[ta.value.charAt(caretAt - 1)] === nextCh && nextCh !== ""){
+    e.preventDefault();
+    ta.selectionStart = caretAt - 1;
+    ta.selectionEnd = caretAt + 1;
+    if(!exec("delete")){
+      ta.value = ta.value.slice(0, caretAt - 1) + ta.value.slice(caretAt + 1);
+      ta.selectionStart = ta.selectionEnd = caretAt - 1;
     }
+    ideRender();
+    return;
   }
 }
+/* execCommand giữ được lịch sử hoàn tác của trình duyệt, nên Ctrl+Z vẫn hoạt động.
+   Gán trực tiếp ta.value sẽ xoá sạch lịch sử đó — chỉ dùng làm phương án dự phòng. */
+function exec(cmd, arg){
+  try{ return document.execCommand(cmd, false, arg); }catch(err){ return false; }
+}
 function insertAt(ta, text, back){
-  var s = ta.selectionStart, e2 = ta.selectionEnd;
-  ta.value = ta.value.slice(0, s) + text + ta.value.slice(e2);
-  var caret = s + text.length - (back || 0);
-  ta.selectionStart = ta.selectionEnd = caret;
+  if(!exec("insertText", text)){
+    var s = ta.selectionStart, e2 = ta.selectionEnd;
+    ta.value = ta.value.slice(0, s) + text + ta.value.slice(e2);
+    ta.selectionStart = ta.selectionEnd = s + text.length;
+  }
+  if(back){
+    var c = ta.selectionStart - back;
+    ta.selectionStart = ta.selectionEnd = c;
+  }
   ideRender();
 }
 el("ideCode").addEventListener("mousedown", function(e){
