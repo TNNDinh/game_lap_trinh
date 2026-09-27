@@ -19,9 +19,26 @@ không script bên ngoài — kể cả bộ thông dịch 3 ngôn ngữ cũng t
 | 06 | Điều kiện | `Nếu…thì`, `Trong khi`, và lỗi vòng lặp vô hạn (2 màn) |
 | 07 | Hàm & tổng hợp | Định nghĩa `leo_bac()` rồi gọi lại, màn cuối gộp mọi khái niệm (2 màn) |
 | 08 | Gõ code điều khiển robot | Bỏ khối lệnh, viết code thật trong IDE — 9 màn kiểm tra lại chương 4–7 |
-| 09 | Tự viết chương trình | 18 bài toán, chấm khớp từng dòng in ra — kiểm tra lại chương 1–3 |
+| 09 | Tự viết chương trình | **38 bài toán**, chấm khớp từng dòng in ra — kiểm tra lại chương 1–3 |
 
-### 18 bài toán ở chương 9
+### Chương 9 có gì
+
+Hai mươi bài sau là phần mở rộng, xếp theo độ khó tăng dần:
+
+- **Vòng lặp và cộng dồn** — đếm số chia hết cho 3, tổng số chẵn, dãy số tam giác,
+  đếm ngược theo bước
+- **Vòng lặp lồng nhau** — bảng nhân 3×3, tam giác ngược, kim tự tháp canh giữa
+- **Số học** — ước chung lớn nhất (Euclid), số hoàn hảo, đếm chữ số, số đối xứng,
+  số Armstrong, liệt kê ước
+- **Tự cài đặt phép tính** — lũy thừa bằng nhân dồn, nhân bằng cộng liên tiếp
+- **Hàm** — viết `la_nguyen_to(n)`, viết `tong(a, b)` có hai tham số
+- **Chuỗi và điều kiện** — độ dài chuỗi, lặp chuỗi, thoát sớm bằng `break`,
+  và một bài tổng hợp cuối chương
+
+Lời giải của cả 38 bài đều được chạy thử qua chính bộ thông dịch trong
+`index.html`, trên cả ba ngôn ngữ, trước khi đưa vào.
+
+### 18 bài toán đầu ở chương 9
 
 Xếp từ dễ tới khó: in một dòng chữ · biến & toán tử · chẵn lẻ · tính tổng 1..10 ·
 bảng cửu chương · **FizzBuzz** · đổi chỗ hai biến · chu vi &amp; diện tích · đếm ngược ·
@@ -41,6 +58,18 @@ Ngữ nghĩa được giữ đúng theo từng ngôn ngữ thay vì gộp làm m
 - `7 / 2` cho `3.5` ở Python, `3.5` ở JavaScript, nhưng `3` ở C++ (hai số nguyên chia nhau).
 - `"diem: " + 10` chạy được ở JavaScript, còn Python và C++ báo lỗi — đúng như thật.
 - Python in `True`, JavaScript in `true`, C++ in `1`.
+
+### Phạm vi biến
+
+Biến khai báo bên trong hàm không đụng tới biến trùng tên ở ngoài — nếu không,
+vòng lặp trong hàm sẽ đè lên vòng lặp đang gọi nó, gây kết quả sai hoặc lặp vô
+hạn. Quy tắc theo đúng từng ngôn ngữ:
+
+- **Python** — mọi phép gán trong hàm đều tạo biến cục bộ.
+- **JavaScript / C++** — chỉ khai báo (`let`, `const`, `var`, `int`, `string`…)
+  mới tạo biến cục bộ; gán trần vẫn sửa biến ngoài.
+
+Python cũng nhận `pass` để giữ chỗ trong thân khối còn trống.
 
 ## Đặc điểm
 

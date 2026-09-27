@@ -867,7 +867,7 @@ var LEVELS = [
 
 var LANGS = {
   py:  {id:"py",  name:"Python",     file:"main.py",  indent:true,  cmt:"#",
-        kw:["def","if","elif","else","while","for","in","range","return","break","continue","and","or","not","True","False","None","print","str","int","float","len"]},
+        kw:["def","if","elif","else","while","for","in","range","return","break","continue","pass","and","or","not","True","False","None","print","str","int","float","len"]},
   js:  {id:"js",  name:"JavaScript", file:"main.js",  indent:false, cmt:"//",
         kw:["function","if","else","while","for","let","const","var","return","break","continue","true","false","null","console","log","String","Number","Math","floor"]},
   cpp: {id:"cpp", name:"C++",        file:"main.cpp", indent:false, cmt:"//",
@@ -1192,6 +1192,8 @@ function parse(tokens, D){
 
     if(atName("break")){ next(); return {k:"break", line:ln}; }
     if(atName("continue")){ next(); return {k:"continue", line:ln}; }
+    // pass: câu lệnh rỗng của Python, dùng để giữ chỗ trong thân khối
+    if(D.id === "py" && atName("pass")){ next(); return {k:"pass", line:ln}; }
 
     if(atName("return")){
       next();
@@ -1358,7 +1360,16 @@ function lookup(ctx, name, line){
   }
   throw new CodeErr("Chưa có biến nào tên '" + name + "'. Phải gán giá trị cho nó trước khi dùng.", line);
 }
-function assign(ctx, name, val){
+function assign(ctx, name, val, decl){
+  // Biến phải nằm đúng phạm vi, nếu không thì vòng lặp bên trong hàm sẽ đè lên
+  // vòng lặp đang gọi nó — gây kết quả sai hoặc lặp vô hạn.
+  //   Python : mọi phép gán trong hàm đều tạo biến CỤC BỘ.
+  //   JS/C++ : chỉ khai báo (let/const/var, int/string/…) mới tạo biến cục bộ;
+  //            gán trần vẫn sửa biến ngoài, đúng như ngôn ngữ thật.
+  if(decl || (ctx.D.id === "py" && ctx.scopes.length > 1)){
+    ctx.scopes[ctx.scopes.length - 1][name] = val;
+    return;
+  }
   for(var i = ctx.scopes.length - 1; i >= 0; i--){
     if(Object.prototype.hasOwnProperty.call(ctx.scopes[i], name)){ ctx.scopes[i][name] = val; return; }
   }
@@ -1473,7 +1484,7 @@ function* execStmt(s, ctx){
       var rhs = yield* evalExpr(s.e, ctx);
       val = binop(s.op.charAt(0), old, rhs, D, s.line);
     }
-    assign(ctx, s.name, val);
+    assign(ctx, s.name, val, s.decl);
     return null;
   }
 
@@ -1528,6 +1539,7 @@ function* execStmt(s, ctx){
 
   if(s.k === "break") return {brk:true};
   if(s.k === "continue") return {cont:true};
+  if(s.k === "pass") return null;          // không làm gì, đúng như Python
 
   if(s.k === "func"){ ctx.funcs[s.name] = s; return null; }
 
@@ -1872,6 +1884,226 @@ var OUT_TASKS = [
     py:"for n in range(2, 21):\n    la_nguyen_to = True\n    # thu chia n cho cac so tu 2 den n-1\n    if la_nguyen_to:\n        print(n)\n",
     js:"for (let n = 2; n <= 20; n++) {\n  let la_nguyen_to = true;\n  // thu chia n cho cac so tu 2 den n-1\n  if (la_nguyen_to) {\n    console.log(n);\n  }\n}\n",
     cpp:cppWrap("    for (int n = 2; n <= 20; n++) {\n        bool la_nguyen_to = true;\n        // thu chia n cho cac so tu 2 den n-1\n        if (la_nguyen_to) {\n            cout << n << endl;\n        }\n    }")
+  }
+},
+{
+  name:"Đếm số chia hết cho 3",
+  brief:"Đếm xem từ 1 đến 30 có bao nhiêu số chia hết cho 3, rồi in ra một dòng duy nhất.",
+  expect:["10"],
+  hint:"Đặt một biến đếm = 0 trước vòng lặp. Trong vòng lặp, nếu i % 3 == 0 thì tăng biến đếm lên 1. In sau khi vòng lặp xong.",
+  code:{
+    py:"dem = 0\nfor i in range(1, 31):\n    # kiem tra chia het cho 3\n    pass\n",
+    js:"let dem = 0;\nfor (let i = 1; i <= 30; i++) {\n  // kiem tra chia het cho 3\n}\n",
+    cpp:cppWrap("    int dem = 0;\n    for (int i = 1; i <= 30; i++) {\n        // kiem tra chia het cho 3\n    }")
+  }
+},
+{
+  name:"Tổng số chẵn",
+  brief:"Tính tổng các số chẵn từ 1 đến 20, in ra một dòng.",
+  expect:["110"],
+  hint:"Cách 1: lặp 1..20 rồi chỉ cộng khi i % 2 == 0. Cách 2: lặp thẳng 2, 4, 6... bằng bước nhảy 2. Cả hai đều đúng.",
+  code:{
+    py:"tong = 0\nfor i in range(1, 21):\n    # chi cong so chan\n    pass\n",
+    js:"let tong = 0;\nfor (let i = 1; i <= 20; i++) {\n  // chi cong so chan\n}\n",
+    cpp:cppWrap("    int tong = 0;\n    for (int i = 1; i <= 20; i++) {\n        // chi cong so chan\n    }")
+  }
+},
+{
+  name:"Bảng nhân 3×3",
+  brief:"Dùng hai vòng lặp lồng nhau in bảng nhân từ 1×1 đến 3×3. Mỗi dòng có dạng <code>2 x 3 = 6</code>, đi theo thứ tự 1×1, 1×2, 1×3, 2×1…",
+  expect:["1 x 1 = 1","1 x 2 = 2","1 x 3 = 3","2 x 1 = 2","2 x 2 = 4","2 x 3 = 6","3 x 1 = 3","3 x 2 = 6","3 x 3 = 9"],
+  hint:"Vòng ngoài chạy i, vòng trong chạy j. Ghép chuỗi bằng str(i) + \" x \" + str(j) + \" = \" + str(i*j). Chú ý khoảng trắng phải khớp đúng.",
+  code:{
+    py:"for i in range(1, 4):\n    for j in range(1, 4):\n        # in mot dong\n        pass\n",
+    js:"for (let i = 1; i <= 3; i++) {\n  for (let j = 1; j <= 3; j++) {\n    // in mot dong\n  }\n}\n",
+    cpp:cppWrap("    for (int i = 1; i <= 3; i++) {\n        for (int j = 1; j <= 3; j++) {\n            // in mot dong\n        }\n    }")
+  }
+},
+{
+  name:"Ước chung lớn nhất",
+  brief:"Cho <code>a = 48</code> và <code>b = 18</code>. Tìm ước chung lớn nhất bằng thuật toán Euclid rồi in ra.",
+  expect:["6"],
+  hint:"Thuật toán Euclid: lặp khi b khác 0 — lấy r = a % b, rồi gán a = b, b = r. Khi b bằng 0 thì a chính là đáp án. Nhớ dùng biến tạm để không mất giá trị.",
+  code:{
+    py:"a = 48\nb = 18\n# thuat toan Euclid\n",
+    js:"let a = 48;\nlet b = 18;\n// thuat toan Euclid\n",
+    cpp:cppWrap("    int a = 48;\n    int b = 18;\n    // thuat toan Euclid")
+  }
+},
+{
+  name:"Số hoàn hảo",
+  brief:"Số hoàn hảo là số bằng đúng tổng các ước nhỏ hơn nó (6 = 1+2+3). Kiểm tra các số từ 1 đến 30, in ra những số hoàn hảo, mỗi số một dòng.",
+  expect:["6","28"],
+  hint:"Với mỗi số n, lặp i từ 1 đến n-1, nếu n % i == 0 thì cộng i vào tổng. Sau đó so tổng với n.",
+  code:{
+    py:"for n in range(1, 31):\n    # tinh tong cac uoc cua n\n    pass\n",
+    js:"for (let n = 1; n <= 30; n++) {\n  // tinh tong cac uoc cua n\n}\n",
+    cpp:cppWrap("    for (int n = 1; n <= 30; n++) {\n        // tinh tong cac uoc cua n\n    }")
+  }
+},
+{
+  name:"Đếm chữ số",
+  brief:"Cho <code>n = 50321</code>. Đếm xem n có bao nhiêu chữ số, in ra một dòng. Không được dùng len().",
+  expect:["5"],
+  hint:"Chia n cho 10 liên tục cho tới khi n về 0, mỗi lần chia thì tăng biến đếm. Nhớ dùng chia lấy nguyên (// ở Python, Math.floor ở JavaScript).",
+  code:{
+    py:"n = 50321\ndem = 0\n# chia cho 10 den khi het\n",
+    js:"let n = 50321;\nlet dem = 0;\n// chia cho 10 den khi het\n",
+    cpp:cppWrap("    int n = 50321;\n    int dem = 0;\n    // chia cho 10 den khi het")
+  }
+},
+{
+  name:"Số đối xứng",
+  brief:"Số đối xứng là số đọc xuôi hay ngược đều như nhau, ví dụ 12321. Kiểm tra <code>n = 12321</code> rồi in <code>doi xung</code> hoặc <code>khong doi xung</code>.",
+  expect:["doi xung"],
+  hint:"Đảo ngược n bằng cách lấy từng chữ số cuối (n % 10) ghép dần vào số mới, rồi so số đảo với số gốc. Nhớ giữ lại bản gốc trong một biến khác trước khi đảo.",
+  code:{
+    py:"n = 12321\ngoc = n\ndao = 0\n# dao nguoc roi so sanh\n",
+    js:"let n = 12321;\nlet goc = n;\nlet dao = 0;\n// dao nguoc roi so sanh\n",
+    cpp:cppWrap("    int n = 12321;\n    int goc = n;\n    int dao = 0;\n    // dao nguoc roi so sanh")
+  }
+},
+{
+  name:"Lũy thừa tự viết",
+  brief:"Tính 2 mũ 10 bằng vòng lặp nhân dồn, <b>không</b> dùng toán tử ** hay hàm pow. In ra một dòng.",
+  expect:["1024"],
+  hint:"Đặt kq = 1, rồi lặp 10 lần, mỗi lần nhân kq với 2. Đây chính là cách máy tính thật sự làm phép lũy thừa.",
+  code:{
+    py:"co_so = 2\nso_mu = 10\nkq = 1\n# nhan don\n",
+    js:"let coSo = 2;\nlet soMu = 10;\nlet kq = 1;\n// nhan don\n",
+    cpp:cppWrap("    int coSo = 2;\n    int soMu = 10;\n    int kq = 1;\n    // nhan don")
+  }
+},
+{
+  name:"Tam giác ngược",
+  brief:"In tam giác sao ngược 5 dòng: dòng đầu 5 dấu sao, dòng sau ít hơn một, dòng cuối còn 1 dấu.",
+  expect:["*****","****","***","**","*"],
+  hint:"Vòng ngoài đếm ngược số dòng, vòng trong ghép chuỗi sao. Dùng một biến chuỗi cộng dồn \"*\" rồi in sau khi vòng trong xong — đừng in từng dấu một.",
+  code:{
+    py:"for i in range(5, 0, -1):\n    # ghep chuoi sao roi in\n    pass\n",
+    js:"for (let i = 5; i >= 1; i--) {\n  // ghep chuoi sao roi in\n}\n",
+    cpp:cppWrap("    for (int i = 5; i >= 1; i--) {\n        // ghep chuoi sao roi in\n    }")
+  }
+},
+{
+  name:"Kim tự tháp",
+  brief:"In kim tự tháp 4 tầng, mỗi tầng canh giữa bằng dấu cách. Tầng 1 có 1 sao và 3 dấu cách đứng trước, tầng 4 có 7 sao không có dấu cách.",
+  expect:["   *","  ***"," *****","*******"],
+  hint:"Tầng i (đếm từ 1) có (4 - i) dấu cách rồi tới (2*i - 1) dấu sao. Ghép cả hai vào một chuỗi rồi in một lần.",
+  code:{
+    py:"for i in range(1, 5):\n    # ghep khoang trang roi ghep sao\n    pass\n",
+    js:"for (let i = 1; i <= 4; i++) {\n  // ghep khoang trang roi ghep sao\n}\n",
+    cpp:cppWrap("    for (int i = 1; i <= 4; i++) {\n        // ghep khoang trang roi ghep sao\n    }")
+  }
+},
+{
+  name:"Hàm kiểm tra nguyên tố",
+  brief:"Viết hàm <code>la_nguyen_to(n)</code> trả về đúng/sai, rồi dùng nó in mọi số nguyên tố từ 2 đến 20, mỗi số một dòng.",
+  expect:["2","3","5","7","11","13","17","19"],
+  hint:"Trong hàm: nếu n < 2 trả về sai. Lặp i từ 2 tới n-1, nếu n chia hết cho i thì trả về sai ngay. Hết vòng lặp mà chưa trả về gì thì trả về đúng.",
+  code:{
+    py:"def la_nguyen_to(n):\n    # tra ve True hoac False\n    return False\n\nfor i in range(2, 21):\n    # goi ham va in neu dung\n    pass\n",
+    js:"function laNguyenTo(n) {\n  // tra ve true hoac false\n  return false;\n}\n\nfor (let i = 2; i <= 20; i++) {\n  // goi ham va in neu dung\n}\n",
+    cpp:cppWrap("    // viet ham o ngoai main roi goi o day")
+  }
+},
+{
+  name:"Hàm tính tổng từ a đến b",
+  brief:"Viết hàm <code>tong(a, b)</code> trả về tổng các số từ a đến b. Gọi thử ba lần và in: tong(1,5), tong(10,12), tong(7,7).",
+  expect:["15","33","7"],
+  hint:"Hàm nhận hai tham số, dùng biến cộng dồn bên trong rồi return. Nhớ vòng lặp phải tính cả b, không được dừng ở b-1.",
+  code:{
+    py:"def tong(a, b):\n    # cong don roi tra ve\n    return 0\n\n# goi ham 3 lan va in\n",
+    js:"function tong(a, b) {\n  // cong don roi tra ve\n  return 0;\n}\n\n// goi ham 3 lan va in\n",
+    cpp:cppWrap("    // viet ham o ngoai main roi goi o day")
+  }
+},
+{
+  name:"Đếm ngược theo bước",
+  brief:"In các số từ 30 giảm dần về 0, mỗi lần giảm 6. Mỗi số một dòng.",
+  expect:["30","24","18","12","6","0"],
+  hint:"Dùng while với biến bắt đầu từ 30, điều kiện lặp là còn lớn hơn hoặc bằng 0, mỗi vòng trừ đi 6. Để ý số 0 có được in không.",
+  code:{
+    py:"n = 30\n# lap va giam dan\n",
+    js:"let n = 30;\n// lap va giam dan\n",
+    cpp:cppWrap("    int n = 30;\n    // lap va giam dan")
+  }
+},
+{
+  name:"Dãy số tam giác",
+  brief:"Dãy số tam giác là 1, 3, 6, 10, 15… — mỗi số bằng số trước cộng thêm vị trí của nó. In 6 số đầu, mỗi số một dòng.",
+  expect:["1","3","6","10","15","21"],
+  hint:"Giữ một biến cộng dồn. Ở vòng lặp thứ i, cộng thêm i rồi in ngay trong vòng lặp.",
+  code:{
+    py:"tong = 0\nfor i in range(1, 7):\n    # cong don roi in\n    pass\n",
+    js:"let tong = 0;\nfor (let i = 1; i <= 6; i++) {\n  // cong don roi in\n}\n",
+    cpp:cppWrap("    int tong = 0;\n    for (int i = 1; i <= 6; i++) {\n        // cong don roi in\n    }")
+  }
+},
+{
+  name:"Số Armstrong",
+  brief:"Số Armstrong ba chữ số là số bằng tổng lập phương các chữ số của nó, ví dụ 153 = 1³+5³+3³. Kiểm tra <code>n = 153</code> và in <code>armstrong</code> hoặc <code>khong phai</code>.",
+  expect:["armstrong"],
+  hint:"Tách từng chữ số bằng n % 10 rồi n // 10. Lập phương là nhân ba lần chính nó. Nhớ giữ bản gốc để so sánh ở cuối.",
+  code:{
+    py:"n = 153\ngoc = n\ntong = 0\n# tach chu so va cong lap phuong\n",
+    js:"let n = 153;\nlet goc = n;\nlet tong = 0;\n// tach chu so va cong lap phuong\n",
+    cpp:cppWrap("    int n = 153;\n    int goc = n;\n    int tong = 0;\n    // tach chu so va cong lap phuong")
+  }
+},
+{
+  name:"Nhân bằng phép cộng",
+  brief:"Tính 7 × 6 mà <b>không</b> dùng dấu nhân — chỉ được cộng liên tiếp. In kết quả.",
+  expect:["42"],
+  hint:"Cộng số 7 đúng 6 lần vào một biến bắt đầu từ 0. Đây là cách bộ vi xử lý đời đầu thực hiện phép nhân.",
+  code:{
+    py:"a = 7\nb = 6\nkq = 0\n# cong lien tiep\n",
+    js:"let a = 7;\nlet b = 6;\nlet kq = 0;\n// cong lien tiep\n",
+    cpp:cppWrap("    int a = 7;\n    int b = 6;\n    int kq = 0;\n    // cong lien tiep")
+  }
+},
+{
+  name:"Độ dài chuỗi",
+  brief:"Cho <code>ten = \"Robot Lab\"</code>. In ra hai dòng: độ dài chuỗi, rồi chuỗi đó lặp lại 3 lần nối liền nhau.",
+  expect:["9","Robot LabRobot LabRobot Lab"],
+  hint:"len(ten) cho độ dài, tính cả dấu cách ở giữa. Để lặp chuỗi, dùng vòng lặp cộng dồn vào một biến chuỗi rỗng.",
+  code:{
+    py:"ten = \"Robot Lab\"\n# in do dai roi in chuoi lap 3 lan\n",
+    js:"let ten = \"Robot Lab\";\n// in do dai roi in chuoi lap 3 lan\n",
+    cpp:cppWrap("    string ten = \"Robot Lab\";\n    // in do dai roi in chuoi lap 3 lan")
+  }
+},
+{
+  name:"Ước của một số",
+  brief:"Cho <code>n = 24</code>. In tất cả các ước của nó theo thứ tự tăng dần, mỗi ước một dòng.",
+  expect:["1","2","3","4","6","8","12","24"],
+  hint:"Lặp i từ 1 đến n, nếu n % i == 0 thì i là ước, in ra. Vòng lặp phải chạy tới hết n vì bản thân n cũng là ước của chính nó.",
+  code:{
+    py:"n = 24\nfor i in range(1, n + 1):\n    # kiem tra uoc\n    pass\n",
+    js:"let n = 24;\nfor (let i = 1; i <= n; i++) {\n  // kiem tra uoc\n}\n",
+    cpp:cppWrap("    int n = 24;\n    for (int i = 1; i <= n; i++) {\n        // kiem tra uoc\n    }")
+  }
+},
+{
+  name:"Thoát sớm bằng break",
+  brief:"Tìm số đầu tiên từ 1 trở lên chia hết cho cả 7 và 5. In số đó rồi dừng vòng lặp ngay, không chạy tiếp.",
+  expect:["35"],
+  hint:"Lặp i từ 1, kiểm tra i % 7 == 0 and i % 5 == 0. Khi tìm thấy thì print rồi break. Thiếu break thì vòng lặp vẫn chạy phí.",
+  code:{
+    py:"for i in range(1, 200):\n    # tim roi thoat som\n    pass\n",
+    js:"for (let i = 1; i < 200; i++) {\n  // tim roi thoat som\n}\n",
+    cpp:cppWrap("    for (int i = 1; i < 200; i++) {\n        // tim roi thoat som\n    }")
+  }
+},
+{
+  name:"Tổng hợp cuối chương",
+  brief:"Bài cuối, gộp nhiều thứ. Với các số từ 1 đến 15: nếu chia hết cho 15 in <code>ba</code>, chia hết cho 3 in <code>a</code>, chia hết cho 5 in <code>b</code>, còn lại in chính số đó. Cuối cùng in thêm một dòng là tổng của riêng những số KHÔNG chia hết cho 3 và cũng không chia hết cho 5.",
+  expect:["1","2","a","4","b","a","7","8","a","b","11","a","13","14","ba","60"],
+  hint:"Thứ tự kiểm tra rất quan trọng: phải xét chia hết cho 15 TRƯỚC, không thì số 15 sẽ rơi nhầm vào nhánh chia hết cho 3. Biến cộng dồn đặt ngoài vòng lặp, chỉ cộng ở nhánh cuối cùng.",
+  code:{
+    py:"tong = 0\nfor i in range(1, 16):\n    # xet 15 truoc, roi 3, roi 5, cuoi cung la so thuong\n    pass\n",
+    js:"let tong = 0;\nfor (let i = 1; i <= 15; i++) {\n  // xet 15 truoc, roi 3, roi 5, cuoi cung la so thuong\n}\n",
+    cpp:cppWrap("    int tong = 0;\n    for (int i = 1; i <= 15; i++) {\n        // xet 15 truoc, roi 3, roi 5, cuoi cung la so thuong\n    }")
   }
 }
 ];
